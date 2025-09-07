@@ -1,0 +1,4 @@
+.vscode
+/ViBlog
+db.sqlite3
+__pycache__
