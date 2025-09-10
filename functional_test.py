@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+import time
 import unittest
 
         # Farshad has recently heard about a cool website where he can write a blog post and share it with others
@@ -22,14 +23,15 @@ class NewVisitorTest(unittest.TestCase):
         self.assertEqual('Monologue!' , header_text)
         
         # he can see a button under the header which reads as "create a post"
-        buttonsList = self.browser.find_elements(By.TAG_NAME, 'button')
+        button = self.browser.find_element(By.ID, 'create_post_button')
 
-        buttons = [b.text for b in buttonsList]
-        self.assertIn('Create a post', buttons)
-
-                
-   
+        self.assertEqual('create a post', button.text.lower())
+        button.click()
+        time.sleep(1)
         # he sees a form where he can type in a heading and the body of the post
+        self.browser.find_element(By.ID, 'post_heading')
+        self.browser.find_element(By.ID, 'post_body')
+
         # after creating the post, he submits it and the site redirects him where he can see his post 
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
 
