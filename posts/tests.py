@@ -5,8 +5,10 @@ from posts.views import home_page
 
 class HomePageTest(TestCase):
     
-    def test_home_page_returns_correct_html(self):
+    def test_home_page_uses_home_template(self):
         response = self.client.get('/')
-        self.assertContains(response, "<title>Welcome to Monologue!<title>")
-        self.assertContains(response.startswith("<html>"))
-        self.assertContains(response.endswith("</html>"))
+        self.assertTemplateUsed(response, 'posts/home.html')
+
+    def test_home_page_returns_correct_content(self):
+        response = self.client.get('/')
+        self.assertContains(response, 'Monologue') 
