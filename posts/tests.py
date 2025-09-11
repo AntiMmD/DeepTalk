@@ -1,6 +1,5 @@
 from django.test import TestCase
-from django.http import HttpRequest
-from posts.views import home_page
+
 # Create your tests here.
 
 class HomePageTest(TestCase):
@@ -9,6 +8,12 @@ class HomePageTest(TestCase):
         response = self.client.get('/')
         self.assertTemplateUsed(response, 'posts/home.html')
 
-    def test_home_page_returns_correct_content(self):
+    def test_home_page_post_button(self):
         response = self.client.get('/')
-        self.assertContains(response, 'Monologue') 
+        self.assertContains(response, '<a href="/posts/new">')
+        self.assertContains(response, '<button id="create_post_button">')  
+
+    def test_create_post_button_renders_a_form_template(self):
+        response = self.client.get('/posts/new')
+        self.assertTemplateUsed(response, 'posts/postForm.html')
+        self.assertContains(response, '<form')
