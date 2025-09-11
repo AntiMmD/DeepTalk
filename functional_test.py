@@ -28,9 +28,16 @@ class NewVisitorTest(unittest.TestCase):
         self.assertEqual('create a post', button.text.lower())
         button.click()
         time.sleep(1)
+
         # he sees a form where he can type in a heading and the body of the post
-        self.browser.find_element(By.ID, 'post_heading')
-        self.browser.find_element(By.ID, 'post_body')
+
+        self.browser.find_element(By.ID, 'post_form')
+        header = self.browser.find_element(By.NAME, 'header_input')
+        body = self.browser.find_element(By.NAME, 'body_input')
+
+        self.assertEqual(header.get_attribute('placeholder'), 'Enter the heading')
+        self.assertEqual(body.get_attribute('placeholder'), 'Enter the body')
+
 
         # after creating the post, he submits it and the site redirects him where he can see his post 
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
