@@ -4,6 +4,8 @@
         <form method="POST" id="post_form">
             <input name="header_input" placeholder="Enter the heading">
             <input name="body_input" placeholder="Enter the body">
+            <button type="submit">Submit</button>
+            {% csrf_token %}
         </form>
     </body>
 </html>
