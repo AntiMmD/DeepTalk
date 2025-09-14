@@ -38,8 +38,24 @@ class NewVisitorTest(unittest.TestCase):
         self.assertEqual(header.get_attribute('placeholder'), 'Enter the heading')
         self.assertEqual(body.get_attribute('placeholder'), 'Enter the body')
 
+        # Farshad wants to write a post about extreme climate and its effects on puppies 
+        header.send_keys('extreme climate and its effects on puppies')
 
-        # after creating the post, he submits it and the site redirects him where he can see his post 
+        body.send_keys('Extreme climate, whether scorching heat or freezing cold, can severely affect puppies.' \
+        'High temperatures can cause dehydration and heatstroke, while extreme cold can lead to hypothermia'
+        ' and frostbite. Puppies are especially vulnerable because their bodies cannot regulate temperature' \
+        ' well. Proper shelter, hydration, and care are essential to keep them safe in harsh weather.')
+
+        # after creating the post, he clicks the submit button and it redirects him where he can see his post 
+        self.browser.find_element(By.ID, 'submit_post').click()
+
+        posted_header= self.browser.find_element(By.ID, 'posted_header').text
+        posted_body = self.browser.find_element(By.ID, 'posted_body').text
+
+        self.assertEqual(posted_header, "extreme climate and its effects on puppies")
+        self.assertIn("Puppies are especially vulnerable because their bodies cannot regulate temperature", posted_body)
+
+
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
 
         self.fail('finish the test')
