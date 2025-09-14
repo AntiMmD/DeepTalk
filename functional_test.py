@@ -47,8 +47,7 @@ class NewVisitorTest(unittest.TestCase):
         ' well. Proper shelter, hydration, and care are essential to keep them safe in harsh weather.')
 
         # after creating the post, he clicks the submit button and it redirects him where he can see his post 
-        self.browser.find_element(By.ID, 'submit_post').click()
-
+        self.browser.find_element(By.TAG_NAME, 'button').click()
         posted_header= self.browser.find_element(By.ID, 'posted_header').text
         posted_body = self.browser.find_element(By.ID, 'posted_body').text
 
