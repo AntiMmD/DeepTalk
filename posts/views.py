@@ -2,9 +2,10 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Post
 from django.shortcuts import redirect
+from django.urls import reverse
 
-def home_page(request):
-    return render(request, 'posts/home.html')
+def home(request):
+    return render(request, r'posts/home.html')
 
 def post_form(request):
     if request.method == 'POST':
