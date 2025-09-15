@@ -21,13 +21,11 @@ class HomePageTest(TestCase):
         self.assertContains(response, '<input name="header_input"')
         self.assertContains(response, '<input name="body_input"')
     
-    def test_can_submit_the_post_form(self):
-
+    def test_can_submit_the_post_form_and_is_redirected(self):
         header = 'header test'
         body = 'body test'
         response = self.client.post(reverse('post_form'),
                             data={'header_input': header, 'body_input': body})
-        
         
         self.assertEqual(Post.objects.count(), 1, msg="Post object was not created. Maybe define the Post model fields?")
         
@@ -38,7 +36,12 @@ class HomePageTest(TestCase):
         redirected_url = f'{reverse("post_view", args=[post_obj.id])}'
         self.assertRedirects(response, redirected_url)
 
-        response = self.client.get(redirected_url)
+    def test_post_view_displays_correct_post(self):
+        header = 'header test'
+        body = 'body test'
+        post_obj = Post.objects.create(header=header, body=body)
+        response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
+
         self.assertTemplateUsed(response, 'posts/postView.html')
         self.assertEqual(response.context['header'], header)
         self.assertEqual(response.context['body'], body )
