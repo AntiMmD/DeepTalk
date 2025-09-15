@@ -12,7 +12,7 @@ def post_form(request):
         post_header = request.POST['header_input']
         post_body = request.POST['body_input']
         post_obj = Post.objects.create(header= post_header, body= post_body)
-        return redirect(f'/posts/posted/{post_obj.id}')
+        return redirect(reverse('post_view', args=[post_obj.id]))
     
     return render(request, 'posts/postForm.html')
 
