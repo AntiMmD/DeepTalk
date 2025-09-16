@@ -2,12 +2,12 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
-import unittest
+from django.test import LiveServerTestCase
 
         # Farshad has recently heard about a cool website where he can write a blog post and share it with others
         # he opens his browser and checks the homepage 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
 
@@ -15,7 +15,7 @@ class NewVisitorTest(unittest.TestCase):
         self.browser.quit()
 
     def test_can_see_the_homepage(self):
-        self.browser.get('http://localhost:8000/')
+        self.browser.get(self.live_server_url)
 
         # Farshad immediately notices the page title and header mentioning 'Monologue'
         header_text = self.browser.find_element( By.TAG_NAME, 'h1' ).text
@@ -58,8 +58,3 @@ class NewVisitorTest(unittest.TestCase):
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
 
         self.fail('finish the test')
-
-
-if __name__ == '__main__':
-    unittest.main()
-
