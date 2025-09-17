@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+    {% for post in posts %}
+        <p>
+            <a href="{% url 'post_view' post.id %}">{{post.header}}</a>
+        </p>
+    {% endfor %}
+</body>
+</html>

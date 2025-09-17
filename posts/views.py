@@ -21,3 +21,8 @@ def post_view(request, id):
     post_header = post_obj.header
     post_body = post_obj.body
     return render(request, 'posts/postView.html', context={'header':post_header, 'body':post_body})
+
+def post_manager(request):
+    
+    posts = Post.objects.all()
+    return render(request, 'posts/postManager.html', context={'posts':posts})
