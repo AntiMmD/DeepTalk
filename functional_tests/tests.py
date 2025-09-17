@@ -1,8 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 import time
 from django.test import LiveServerTestCase
+from django.urls import reverse
+from urllib.parse import urlparse
+
 
         # Farshad has recently heard about a cool website where he can write a blog post and share it with others
         # he opens his browser and checks the homepage 
@@ -53,6 +55,13 @@ class NewVisitorTest(LiveServerTestCase):
 
         self.assertEqual(posted_header, "extreme climate and its effects on puppies")
         self.assertIn("Puppies are especially vulnerable because their bodies cannot regulate temperature", posted_body)
+        # after checking his post, Farshad wants to go back to the home page
+        # so he clicks on the name of the website visible on the top-left of the page which redirects him-
+        # to the hamepage 
+
+        self.browser.find_element(By.ID, 'home_redirect').click()
+        url = self.browser.current_url
+        self.assertEqual(urlparse(url).path, reverse('home'))
 
 
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
