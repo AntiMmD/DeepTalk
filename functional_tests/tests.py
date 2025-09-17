@@ -5,7 +5,6 @@ from django.test import LiveServerTestCase
 from django.urls import reverse
 from urllib.parse import urlparse
 
-
         # Farshad has recently heard about a cool website where he can write a blog post and share it with others
         # he opens his browser and checks the homepage 
 
@@ -63,7 +62,39 @@ class NewVisitorTest(LiveServerTestCase):
         url = self.browser.current_url
         self.assertEqual(urlparse(url).path, reverse('home'))
 
+        # he creates another post and returns to the home page when he's done
+        self.browser.find_element(By.ID, 'create_post_button').click()
+
+        self.browser.find_element(By.ID, 'post_form')
+        header = self.browser.find_element(By.NAME, 'header_input')
+        body = self.browser.find_element(By.NAME, 'body_input')
+
+        header.send_keys('Why puppies are the best!')
+        body.send_keys('Becasue they woof-woof all the times!')
+        self.browser.find_element(By.TAG_NAME, 'button').click()
+        self.browser.find_element(By.ID, 'home_redirect').click()
+
+        # Farshad suddenly remembers that he hadn't checked if he has written all the
+        # reasons for why the puppies are the best
+        # so he uses the navigation feature at the right corner of the home page called 'My Posts'
+        # after clicking on it, he can see a page displaying the headers of his 2 posts
+
+        my_posts_clickable= self.browser.find_element(By.ID, 'my_posts')
+        self.assertEqual(my_posts_clickable.text, 'My Posts')
+
+        my_posts_clickable.click()
+
+        assert self.browser.find_elements(By.TAG_NAME, 'p'), "<p> element not found"
+
+        headers = ['Why puppies are the best!',"extreme climate and its effects on puppies"]
+        posts = self.browser.find_elements(By.TAG_NAME, 'a')
+        for post in posts:
+            self.assertIn(post.text, headers)
+
+
+
+        # he clicks on his first post and navigates to see the details of the post 
+        
+        self.fail('finish the test')
 
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
-
-        self.fail('finish the test')
