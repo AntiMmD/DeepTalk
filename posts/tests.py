@@ -30,11 +30,10 @@ class HomePageTest(TestCase):
         self.assertEqual(Post.objects.count(), 1, msg="Post object was not created. Maybe define the Post model fields?")
         
         post_obj = Post.objects.last()  
+
         self.assertEqual(post_obj.header, header)
         self.assertEqual(post_obj.body, body)
-
-        redirected_url = f'{reverse("post_view", args=[post_obj.id])}'
-        self.assertRedirects(response, redirected_url)
+        self.assertRedirects(response, f'{reverse("post_view", args=[post_obj.id])}')
 
     def test_post_view_displays_correct_post(self):
         header = 'header test'
@@ -47,3 +46,11 @@ class HomePageTest(TestCase):
         self.assertEqual(response.context['body'], body )
         self.assertContains(response, '<p id="posted_header"')
         self.assertContains(response, '<p id="posted_body"')
+    
+    def test_post_view_allows_navigation_back_home(self):
+        header = 'header test'
+        body = 'body test'
+        post_obj = Post.objects.create(header=header, body=body)
+        response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
+        self.assertContains(response, f'<a href="{reverse("home")}"')
+        self.assertContains(response,'id="home_redirect"')
