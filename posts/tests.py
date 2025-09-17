@@ -4,6 +4,15 @@ from django.urls import reverse
 # Create your tests here.
 
 class HomePageTest(TestCase):
+
+    header = 'header test'
+    body = 'body test'    
+
+    @staticmethod
+    def create_post(header='header test', body= 'body test'):
+        post_obj = Post.objects.create(header=header, body=body)
+        return post_obj
+
     
     def test_home_page_uses_home_template(self):
         response = self.client.get(reverse('home'))
@@ -27,6 +36,7 @@ class HomePageTest(TestCase):
         response = self.client.post(reverse('post_form'),
                             data={'header_input': header, 'body_input': body})
         
+        
         self.assertEqual(Post.objects.count(), 1, msg="Post object was not created. Maybe define the Post model fields?")
         
         post_obj = Post.objects.last()  
@@ -36,21 +46,19 @@ class HomePageTest(TestCase):
         self.assertRedirects(response, f'{reverse("post_view", args=[post_obj.id])}')
 
     def test_post_view_displays_correct_post(self):
-        header = 'header test'
-        body = 'body test'
-        post_obj = Post.objects.create(header=header, body=body)
+
+        post_obj = self.create_post()
         response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
 
         self.assertTemplateUsed(response, 'posts/postView.html')
-        self.assertEqual(response.context['header'], header)
-        self.assertEqual(response.context['body'], body )
+        self.assertEqual(response.context['header'], self.header)
+        self.assertEqual(response.context['body'], self.body )
         self.assertContains(response, '<p id="posted_header"')
         self.assertContains(response, '<p id="posted_body"')
     
     def test_post_view_allows_navigation_back_home(self):
-        header = 'header test'
-        body = 'body test'
-        post_obj = Post.objects.create(header=header, body=body)
+
+        post_obj = self.create_post()
         response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
         self.assertContains(response, f'<a href="{reverse("home")}"')
         self.assertContains(response,'id="home_redirect"')
