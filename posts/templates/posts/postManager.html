@@ -3,7 +3,7 @@
 
 <body>
     {% for post in posts %}
-        <p>
+        <p class="my_posts">
             <a href="{% url 'post_view' post.id %}">{{post.header}}</a>
         </p>
     {% endfor %}

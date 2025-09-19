@@ -15,6 +15,18 @@ class NewVisitorTest(LiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
+    def create_post(self, header='header test', body= 'body test'):
+
+        self.browser.get(f'{self.live_server_url}{reverse('post_form')}')
+        self.browser.find_element(By.ID, 'post_form')
+        header_input = self.browser.find_element(By.NAME, 'header_input')
+        body_input = self.browser.find_element(By.NAME, 'body_input')
+
+        header_input.send_keys(header)
+        body_input.send_keys(body)
+        self.browser.find_element(By.TAG_NAME, 'button').click()
+
+
     def test_can_see_the_homepage(self):
         self.browser.get(self.live_server_url)
 
@@ -53,7 +65,8 @@ class NewVisitorTest(LiveServerTestCase):
         posted_body = self.browser.find_element(By.ID, 'posted_body').text
 
         self.assertEqual(posted_header, "extreme climate and its effects on puppies")
-        self.assertIn("Puppies are especially vulnerable because their bodies cannot regulate temperature", posted_body)
+        self.assertIn("Puppies are especially vulnerable because their bodies cannot regulate temperature",
+                       posted_body)
         # after checking his post, Farshad wants to go back to the home page
         # so he clicks on the name of the website visible on the top-left of the page which redirects him-
         # to the hamepage 
@@ -63,15 +76,9 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertEqual(urlparse(url).path, reverse('home'))
 
         # he creates another post and returns to the home page when he's done
-        self.browser.find_element(By.ID, 'create_post_button').click()
-
-        self.browser.find_element(By.ID, 'post_form')
-        header = self.browser.find_element(By.NAME, 'header_input')
-        body = self.browser.find_element(By.NAME, 'body_input')
-
-        header.send_keys('Why puppies are the best!')
-        body.send_keys('Becasue they woof-woof all the times!')
-        self.browser.find_element(By.TAG_NAME, 'button').click()
+        self.create_post(header='Why puppies are the best!',
+                        body='Becasue they woof-woof all the time!')
+        
         self.browser.find_element(By.ID, 'home_redirect').click()
 
         # Farshad suddenly remembers that he hadn't checked if he has written all the
@@ -87,7 +94,7 @@ class NewVisitorTest(LiveServerTestCase):
         assert self.browser.find_elements(By.TAG_NAME, 'p'), "<p> element not found"
 
         headers = ['Why puppies are the best!',"extreme climate and its effects on puppies"]
-        posts = self.browser.find_elements(By.TAG_NAME, 'a')
+        posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts')
         for post in posts:
             self.assertIn(post.text, headers)
 
@@ -95,6 +102,25 @@ class NewVisitorTest(LiveServerTestCase):
 
         # he clicks on his first post and navigates to see the details of the post 
         
-        self.fail('finish the test')
+        # self.fail('finish the test')
 
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
+
+    def test_multiple_users_can_use_the_site_without_interfering_each_other(self):
+
+        #Farshad creates a post
+
+        self.create_post(header='Why puppies are the best!',
+                          body='Becasue they woof-woof all the time!')
+        
+        # in the meantime, a new user, Sara is doing the same thing!
+
+        self.browser.delete_all_cookies() ## to simulate a new user
+        self.create_post(header='Why kitties are the best!', body='Cause they wanna watch the world burn :3')
+        
+        # She goes to check her post in the My Posts section where she can only see her posts
+
+        self.browser.get(f'{self.live_server_url}{reverse('post_manager')}')
+        posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts' )
+        my_posts = [post.text for post in posts]
+        self.assertNotIn('Why puppies are the best!', my_posts)
