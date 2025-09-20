@@ -37,7 +37,6 @@ class HomePageTest(TestCase):
         self.assertContains(response, '<input name="body_input"')
     
     def test_can_submit_the_post_form_and_is_redirected(self):
-
         response = self.client.post(reverse('post_form'),
                             data={'header_input': self.header, 'body_input': self.body})
         
@@ -50,7 +49,6 @@ class HomePageTest(TestCase):
         self.assertRedirects(response, f'{reverse("post_view", args=[post_obj.id])}')
 
     def test_post_view_displays_correct_post(self):
-
         post_obj = self.create_post()
         response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
 
@@ -61,20 +59,20 @@ class HomePageTest(TestCase):
         self.assertContains(response, '<p id="posted_body"')
     
     def test_post_view_allows_navigation_back_home(self):
-
         post_obj = self.create_post()
         response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
         self.assertContains(response, f'<a href="{reverse("home")}"')
         self.assertContains(response,'id="home_redirect"')
 
-    def test_can_navigate_to_posts_manager(self):
-        post_objects= self.create_post(amount=2)
+    def test_can_navigate_to_post_manager(self):
         response= self.client.get(reverse('home'))
 
         self.assertContains(response, f'<a href="{reverse("post_manager")}"')
-
-        
+    
+    def test_post_manager_uses_the_correct_template_and_contents(self):
+        post_objects= self.create_post(amount=2)
         response= self.client.get(reverse('post_manager'))
+
         self.assertTemplateUsed(response, 'posts/postManager.html')
         self.assertContains(response, "<html")
         self.assertContains(response, f'<a href="{reverse("post_view", args=[post_objects[0].id])}"')
