@@ -40,7 +40,22 @@ class NewVisitorTest(LiveServerTestCase):
 
         self.assertEqual('create a post', button.text.lower())
         button.click()
-        time.sleep(1)
+
+         # Farshad sees a sign-un form instead, he understand that he needs to sign-up first using email
+        # he does so
+
+        self.assertEqual(urlparse(self.browser.current_url).path, reverse('sign_up'))
+
+        email_input= self.browser.find_element(By.ID, "email_input")
+        password_input= self.browser.find_element(By.ID, "password_input")
+
+        email_input.send_keys('farshad@gmail.com')
+        password_input.send_keys('1234')
+        self.browser.find_element(By.ID, "submit_button").click()
+
+        # after signing-in, he is redirected to the homepage
+        self.assertEqual(urlparse(self.browser.current_url).path, reverse('home'))
+        self.browser.find_element(By.ID, 'create_post_button').click()
 
         # he sees a form where he can type in a heading and the body of the post
 
