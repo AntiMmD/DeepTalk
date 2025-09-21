@@ -37,6 +37,10 @@ class HomePageTest(TestCase):
         self.assertContains(response, f'<a href="{reverse("post_form")}">')
         self.assertContains(response, '<button id="create_post_button">')  
     
+    def test_create_post_button_redirects_logged_out_user_to_signup(self):
+        response = self.client.get(reverse('post_form'))
+        self.assertRedirects(response, reverse('sign_up'))
+        
     def test_create_post_button_renders_a_form_template_correctly_for_a_logged_in_user(self):
         user = User.objects.create(email= 'test@gmail.com',username= 'test')
         self.client.force_login(user)
