@@ -3,9 +3,33 @@
 
 <body>
     <form method="POST">
-        <input name="email_input">
-        <input name="username_input">
-        <input name="password_input">
+        {% csrf_token %}
+        <table>
+            <tr>
+                
+                <th><label for="email_input">Email:</label></th>
+                <td>
+                    <input name="email_input" id="email_input" type="email" required>
+                </td>
+            </tr>
+
+            <tr>
+                <th><label for="username_input">Username:</label></th>
+                    <td>
+                        <input name="username_input" id="username_input" required>
+                    </td>
+            </tr>
+
+            <tr>
+                
+                <th><label for="password_input">Password:</label></th>
+                <td>
+                    <input name="password_input" id="password_input" type="password" required>
+                </td>
+            </tr>
+        </table>
+
+        <button type="submit" id="submit_button">submit</button>
     </form>    
 </body>
 </html>

@@ -46,10 +46,16 @@ class NewVisitorTest(LiveServerTestCase):
 
         self.assertEqual(urlparse(self.browser.current_url).path, reverse('sign_up'))
 
-        email_input= self.browser.find_element(By.ID, "email_input")
-        password_input= self.browser.find_element(By.ID, "password_input")
+        self.assertIn('email:', self.browser.page_source.lower())
+        self.assertIn('username:', self.browser.page_source.lower())
+        self.assertIn('password:', self.browser.page_source.lower())
 
+        email_input= self.browser.find_element(By.ID, "email_input")
+        username_input= self.browser.find_element(By.ID, "username_input")
+        password_input= self.browser.find_element(By.ID, "password_input")
+                
         email_input.send_keys('farshad@gmail.com')
+        username_input.send_keys('Farshad')
         password_input.send_keys('1234')
         self.browser.find_element(By.ID, "submit_button").click()
 
