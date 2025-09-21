@@ -2,10 +2,16 @@
 <html>
     <body>
         <form method="POST" id="post_form">
-            <input name="header_input" placeholder="Enter the heading">
-            <input name="body_input" placeholder="Enter the body">
-            <button type="submit">Submit</button>
             {% csrf_token %}
+            
+            <p>
+                <input name="header_input" placeholder="Enter the heading" type="text">
+            </p>
+            <p>
+                <textarea name="body_input" id="body_input" placeholder="Enter the body" rows="10" cols="80"></textarea>
+            </p>
+            
+            <button type="submit">Submit</button>
         </form>
     </body>
 </html>

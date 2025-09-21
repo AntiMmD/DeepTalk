@@ -48,7 +48,7 @@ class HomePageTest(TestCase):
         self.assertTemplateUsed(response, 'posts/postForm.html')
         self.assertContains(response, '<form method="POST"')
         self.assertContains(response, '<input name="header_input"')
-        self.assertContains(response, '<input name="body_input"')
+        self.assertContains(response, '<textarea name="body_input"')
     
     def test_can_submit_the_post_form_and_is_redirected(self):
         user = User.objects.create(email= 'test@gmail.com' ,username= 'test')
