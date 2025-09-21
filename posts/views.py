@@ -3,15 +3,31 @@ from django.http import HttpResponse
 from .models import Post
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.contrib.auth import get_user_model, login
+
 
 def home(request):
     return render(request, r'posts/home.html')
 
+User = get_user_model()
+def sign_up(request):
+    if request.method == 'POST':
+        email = request.POST['email_input']
+        username= request.POST['username_input']
+        password = request.POST['password_input']
+        user = User.objects.create_user(email=email,username=username, password=password)
+        login(request, user)  
+        return redirect('home')
+    
+    return render(request, 'posts/signUp.html')
+
+
 def post_form(request):
     if request.method == 'POST':
+        post_user = request.user
         post_header = request.POST['header_input']
         post_body = request.POST['body_input']
-        post_obj = Post.objects.create(header= post_header, body= post_body)
+        post_obj = Post.objects.create(user= post_user, header= post_header, body= post_body)
         return redirect(reverse('post_view', args=[post_obj.id]))
     
     return render(request, 'posts/postForm.html')
