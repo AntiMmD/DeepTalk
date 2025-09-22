@@ -15,6 +15,28 @@ class NewVisitorTest(LiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
+    def login(self,email= 'test@gmail.com', password='test1234'):
+        
+        self.browser.get(self.live_server_url + reverse('login'))
+
+        email_input= self.browser.find_element(By.ID, "email_input")
+        password_input= self.browser.find_element(By.ID, "password_input")
+                
+        email_input.send_keys(email)
+        password_input.send_keys(password)
+        self.browser.find_element(By.ID, "submit").click()
+
+    def sign_up(self,email= 'test@gmail.com',username= 'test',password='test1234'):
+        self.browser.get(f'{self.live_server_url}{reverse('sign_up')}')
+        email_input= self.browser.find_element(By.ID, "email_input")
+        username_input= self.browser.find_element(By.ID, "username_input")
+        password_input= self.browser.find_element(By.ID, "password_input")
+                
+        email_input.send_keys(email)
+        username_input.send_keys(username)
+        password_input.send_keys(password)
+        self.browser.find_element(By.ID, "submit_button").click()
+
     def create_post(self, header='header test', body= 'body test'):
 
         self.browser.get(f'{self.live_server_url}{reverse('post_form')}')
@@ -129,14 +151,19 @@ class NewVisitorTest(LiveServerTestCase):
 
     def test_multiple_users_can_use_the_site_without_interfering_each_other(self):
 
-        #Farshad creates a post
+        #Farshad logs-in again and creates a post
+        self.sign_up()
+        self.browser.delete_all_cookies() ## to simulate a new user
+        self.login()
 
         self.create_post(header='Why puppies are the best!',
                           body='Becasue they woof-woof all the time!')
         
         # in the meantime, a new user, Sara is doing the same thing!
 
-        self.browser.delete_all_cookies() ## to simulate a new user
+        self.sign_up(email='sara@gmail.com', username='sara', password='sara')
+        self.browser.delete_all_cookies()
+        self.login(email='sara@gmail.com', password='sara') 
         self.create_post(header='Why kitties are the best!', body='Cause they wanna watch the world burn :3')
         
         # She goes to check her post in the My Posts section where she can only see her posts
@@ -145,3 +172,4 @@ class NewVisitorTest(LiveServerTestCase):
         posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts' )
         my_posts = [post.text for post in posts]
         self.assertNotIn('Why puppies are the best!', my_posts)
+        self.assertIn('Why kitties are the best!')
