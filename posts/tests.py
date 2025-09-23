@@ -133,19 +133,42 @@ class PostViewTest(TestCase):
 
 
 class PostManagerTest(TestCase):
-    def test_post_manager_uses_the_correct_template_and_contents(self):
+    def test_post_manager_uses_the_correct_template(self):
+        user = User.objects.create(email= 'test@gmail.com',username= 'test')
+        self.client.force_login(user)
+        response= self.client.get(reverse('post_manager'))
+
+        self.assertTemplateUsed(response, 'posts/postManager.html')
+
+
+    def test_post_manager_has_the_correct_contents(self):
         user = User.objects.create(email= 'test@gmail.com',username= 'test')
         self.client.force_login(user)
         post_objects= create_post(user=user, amount=2)
         response= self.client.get(reverse('post_manager'))
 
-        self.assertTemplateUsed(response, 'posts/postManager.html')
         self.assertContains(response, "<html")
         self.assertContains(response, f'<a href="{reverse("post_view", args=[post_objects[0].id])}"')
         self.assertContains(response, post_objects[0].header)
         self.assertContains(response, f'<a href="{reverse("post_view", args=[post_objects[1].id])}"')
         self.assertContains(response, post_objects[1].header)
 
+    def test_post_manager_redirects_to_login_page_if_user_is_loged_out(self):
+        response= self.client.get(reverse('post_manager'))
+        self.assertRedirects(response, reverse('login'))
+
+    def test_post_manager_only_displays_the_logged_in_users_posts(self):
+        user = User.objects.create(email= 'test1@gmail.com',username= 'test1')
+        post_obj1= create_post(user=user) 
+
+        user = User.objects.create(email= 'test2@gmail.com',username= 'test2')
+        post_obj2= create_post(user= user, header='smth', body='smth')
+        self.client.force_login(user)
+
+        response= self.client.get(reverse('post_manager'))
+
+        self.assertNotContains(response, post_obj1.header)
+        self.assertContains(response, post_obj2.header)
 
 class UserAndPostModelsTest(TestCase):
 

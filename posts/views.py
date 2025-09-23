@@ -54,6 +54,8 @@ def post_view(request, id):
     return render(request, 'posts/postView.html', context={'header':post_header, 'body':post_body})
 
 def post_manager(request):
+    if request.user.is_authenticated:
+            posts = Post.objects.filter(user= request.user)
+            return render(request, 'posts/postManager.html', context={'posts':posts})
     
-    posts = Post.objects.all()
-    return render(request, 'posts/postManager.html', context={'posts':posts})
+    return(redirect('login'))
