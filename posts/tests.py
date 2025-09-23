@@ -1,9 +1,26 @@
 from django.test import TestCase
 from posts.models import Post,User
 from django.urls import reverse
-# Create your tests here.
 
 class AuthenticationTest(TestCase):
+
+    def test_user_can_sign_up(self):
+        response = self.client.get(reverse('sign_up'))
+        self.assertTemplateUsed(response, 'posts/signUp.html')
+        self.assertContains(response, '<form method="POST"')
+        self.assertContains(response, '<input name="email_input"')
+        self.assertContains(response, '<input name="username_input"')
+        self.assertContains(response, '<input name="password_input"')
+
+    def test_can_submit_the_sign_up_form_and_is_redirected_to_home_being_authenticated(self):
+        response = self.client.post(reverse('sign_up'),
+                                    data={'email_input': 'test@gmail.com',
+                                        'username_input':'user',
+                                        'password_input':'test'})
+        
+        self.assertEqual(User.objects.all().count(), 1, msg="User object was not created.")
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertRedirects(response, reverse('home'))
 
     def test_login_renders_the_correct_template(self):
         response= self.client.get(reverse('login'))
@@ -36,13 +53,25 @@ class AuthenticationTest(TestCase):
         self.assertTrue(user.check_password('test1234'))
         self.assertRedirects(response, reverse('home'))
 
-
 class HomePageTest(TestCase):
-    header = 'header test'
-    body = 'body test'    
+    
+    def test_home_page_uses_home_template(self):
+        response = self.client.get(reverse('home'))
+        self.assertTemplateUsed(response, 'posts/home.html')
 
-    @staticmethod
-    def create_post(header='header test', body= 'body test', amount=1):
+    def test_home_page_post_button(self):
+        response = self.client.get(reverse('home'))
+        self.assertContains(response, f'<a href="{reverse("post_form")}">')
+        self.assertContains(response, '<button id="create_post_button">')      
+
+    def test_can_navigate_to_post_manager(self):
+        response= self.client.get(reverse('home'))
+
+        self.assertContains(response, f'<a href="{reverse("post_manager")}"')
+
+header = 'header test'
+body = 'body test'    
+def create_post(header=header, body= body, amount=1):
         if amount ==1:
             user = User.objects.create(username= 'test',email= 'test@gmail.com')
             post_obj = Post.objects.create(user=user, header=header, body=body)
@@ -61,20 +90,13 @@ class HomePageTest(TestCase):
         post_objects = Post.objects.bulk_create(posts)
         return post_objects
 
-    
-    def test_home_page_uses_home_template(self):
-        response = self.client.get(reverse('home'))
-        self.assertTemplateUsed(response, 'posts/home.html')
 
-    def test_home_page_post_button(self):
-        response = self.client.get(reverse('home'))
-        self.assertContains(response, f'<a href="{reverse("post_form")}">')
-        self.assertContains(response, '<button id="create_post_button">')  
-    
+class CreatePostTest(TestCase):
+
     def test_create_post_button_redirects_logged_out_user_to_signup(self):
         response = self.client.get(reverse('post_form'))
         self.assertRedirects(response, reverse('sign_up'))
-        
+
     def test_create_post_button_renders_a_form_template_correctly_for_a_logged_in_user(self):
         user = User.objects.create(email= 'test@gmail.com',username= 'test')
         self.client.force_login(user)
@@ -88,39 +110,38 @@ class HomePageTest(TestCase):
         user = User.objects.create(email= 'test@gmail.com' ,username= 'test')
         self.client.force_login(user)
         response = self.client.post(reverse('post_form'),
-                            data={'header_input': self.header, 'body_input': self.body})
+                            data={'header_input': header, 'body_input': body})
         
         self.assertEqual(Post.objects.count(), 1, msg="Post object was not created. Maybe define the Post model fields?")
         
         post_obj = Post.objects.last()  
 
-        self.assertEqual(post_obj.header, self.header)
-        self.assertEqual(post_obj.body, self.body)
+        self.assertEqual(post_obj.header, header)
+        self.assertEqual(post_obj.body, body)
         self.assertRedirects(response, f'{reverse("post_view", args=[post_obj.id])}')
+        
 
+class PostViewTest(TestCase):
     def test_post_view_displays_correct_post(self):
-        post_obj = self.create_post()
+        post_obj = create_post()
         response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
 
         self.assertTemplateUsed(response, 'posts/postView.html')
-        self.assertEqual(response.context['header'], self.header)
-        self.assertEqual(response.context['body'], self.body )
+        self.assertEqual(response.context['header'], header)
+        self.assertEqual(response.context['body'], body )
         self.assertContains(response, '<p id="posted_header"')
         self.assertContains(response, '<p id="posted_body"')
     
     def test_post_view_allows_navigation_back_home(self):
-        post_obj = self.create_post()
+        post_obj = create_post()
         response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
         self.assertContains(response, f'<a href="{reverse("home")}"')
         self.assertContains(response,'id="home_redirect"')
 
-    def test_can_navigate_to_post_manager(self):
-        response= self.client.get(reverse('home'))
 
-        self.assertContains(response, f'<a href="{reverse("post_manager")}"')
-    
+class PostManagerTest(TestCase):
     def test_post_manager_uses_the_correct_template_and_contents(self):
-        post_objects= self.create_post(amount=2)
+        post_objects= create_post(amount=2)
         response= self.client.get(reverse('post_manager'))
 
         self.assertTemplateUsed(response, 'posts/postManager.html')
@@ -129,25 +150,6 @@ class HomePageTest(TestCase):
         self.assertContains(response, post_objects[0].header)
         self.assertContains(response, f'<a href="{reverse("post_view", args=[post_objects[1].id])}"')
         self.assertContains(response, post_objects[1].header)
-
-    def test_user_can_sign_up(self):
-        response = self.client.get(reverse('sign_up'))
-        self.assertTemplateUsed(response, 'posts/signUp.html')
-        self.assertContains(response, '<form method="POST"')
-        self.assertContains(response, '<input name="email_input"')
-        self.assertContains(response, '<input name="username_input"')
-        self.assertContains(response, '<input name="password_input"')
-
-    def test_can_submit_the_sign_up_form_and_is_redirected_to_home_being_authenticated(self):
-        response = self.client.post(reverse('sign_up'),
-                                    data={'email_input': 'test@gmail.com',
-                                        'username_input':'user',
-                                        'password_input':'test'})
-        
-        self.assertEqual(User.objects.all().count(), 1, msg="User object was not created.")
-        self.assertTrue(response.wsgi_request.user.is_authenticated)
-        self.assertRedirects(response, reverse('home'))
-        
 
 
 class UserAndPostModelsTest(TestCase):
