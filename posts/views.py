@@ -2,9 +2,9 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Post
 from django.shortcuts import redirect
-from django.urls import reverse
-from django.contrib.auth import get_user_model, login
-
+from django.urls import reverse, reverse_lazy
+from django.contrib.auth import get_user_model, login, authenticate
+from django.contrib.auth.views import LoginView
 
 def home(request):
     return render(request, r'posts/home.html')
@@ -21,6 +21,17 @@ def sign_up(request):
     
     return render(request, 'posts/signUp.html')
 
+def log_in(request):
+    if request.method == 'POST':
+        email=request.POST['email_input']
+        password= request.POST['password_input']
+ 
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect(reverse('home'))
+
+    return render(request, 'posts/login.html')
 
 def post_form(request):
     if request.user.is_authenticated:

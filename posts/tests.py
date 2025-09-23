@@ -3,6 +3,40 @@ from posts.models import Post,User
 from django.urls import reverse
 # Create your tests here.
 
+class AuthenticationTest(TestCase):
+
+    def test_login_renders_the_correct_template(self):
+        response= self.client.get(reverse('login'))
+        self.assertTemplateUsed(response,'posts/login.html')
+
+    def test_login_url_has_the_correct_contents(self):
+        response= self.client.get(reverse('login'))
+        self.assertContains(response, '<form id="login"')
+        self.assertContains(response, 'name="email_input"')
+        self.assertContains(response, 'name="password_input"')
+    
+
+    def test__user_can_not_authenticate_with_incorrect_password(self):
+        User.objects.create_user(email='test@gmail.com', username= 'test', password='test1234')
+        
+        response= self.client.post(reverse('login'),
+                        data={'email_input': 'test@gmail.com','password_input': 'wrongpass' })
+
+        self.assertFalse(response.wsgi_request.user.is_authenticated,
+                         msg='user is loged in with an incorrect password!')
+                
+    def test_valid_user_is_redirected_to_home_after_login_in(self):
+        User.objects.create_user(email='test@gmail.com', username= 'test', password='test1234')
+        user = User.objects.get(email='test@gmail.com')
+
+        response= self.client.post(reverse('login'),
+                        data={'email_input': 'test@gmail.com','password_input': 'test1234' })
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.wsgi_request.user.email, 'test@gmail.com')
+        self.assertTrue(user.check_password('test1234'))
+        self.assertRedirects(response, reverse('home'))
+
+
 class HomePageTest(TestCase):
     header = 'header test'
     body = 'body test'    
