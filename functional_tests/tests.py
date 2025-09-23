@@ -165,4 +165,4 @@ class NewVisitorTest(LiveServerTestCase):
         posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts' )
         my_posts = [post.text for post in posts]
         self.assertNotIn('Why puppies are the best!', my_posts)
-        self.assertIn('Why kitties are the best!')
+        self.assertIn('Why kitties are the best!', my_posts)
