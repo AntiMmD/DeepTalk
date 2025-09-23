@@ -71,24 +71,15 @@ class HomePageTest(TestCase):
 
 header = 'header test'
 body = 'body test'    
-def create_post(header=header, body= body, amount=1):
-        if amount ==1:
-            user = User.objects.create(username= 'test',email= 'test@gmail.com')
-            post_obj = Post.objects.create(user=user, header=header, body=body)
-            return post_obj
-        
-        usernames = []
-        emails= []
-        for i in range(0,amount):
-            usernames.append(str(i))
-            emails.append(f'test{str(i)}@gmail.com')
-
-        users = [User(username=u, email=e) for u, e in zip(usernames, emails)]
-        saved_users = User.objects.bulk_create(users)
-
-        posts= [Post(user= user, header= header, body=body) for user in saved_users]
-        post_objects = Post.objects.bulk_create(posts)
-        return post_objects
+def create_post(user, header=header, body= body, amount=1):
+    
+    if amount ==1:
+        post_obj = Post.objects.create(user=user, header=header, body=body)
+        return post_obj
+    
+    posts= [Post(user= user, header= header, body=body) for _ in range(0,amount)]
+    post_objects = Post.objects.bulk_create(posts)
+    return post_objects
 
 
 class CreatePostTest(TestCase):
@@ -123,7 +114,8 @@ class CreatePostTest(TestCase):
 
 class PostViewTest(TestCase):
     def test_post_view_displays_correct_post(self):
-        post_obj = create_post()
+        user = User.objects.create(email= 'test@gmail.com',username= 'test')
+        post_obj = create_post(user= user)
         response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
 
         self.assertTemplateUsed(response, 'posts/postView.html')
@@ -133,7 +125,8 @@ class PostViewTest(TestCase):
         self.assertContains(response, '<p id="posted_body"')
     
     def test_post_view_allows_navigation_back_home(self):
-        post_obj = create_post()
+        user = User.objects.create(email= 'test@gmail.com',username= 'test')
+        post_obj = create_post(user= user)
         response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
         self.assertContains(response, f'<a href="{reverse("home")}"')
         self.assertContains(response,'id="home_redirect"')
@@ -141,7 +134,9 @@ class PostViewTest(TestCase):
 
 class PostManagerTest(TestCase):
     def test_post_manager_uses_the_correct_template_and_contents(self):
-        post_objects= create_post(amount=2)
+        user = User.objects.create(email= 'test@gmail.com',username= 'test')
+        self.client.force_login(user)
+        post_objects= create_post(user=user, amount=2)
         response= self.client.get(reverse('post_manager'))
 
         self.assertTemplateUsed(response, 'posts/postManager.html')
