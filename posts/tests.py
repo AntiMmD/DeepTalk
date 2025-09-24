@@ -61,13 +61,13 @@ class HomePageTest(TestCase):
 
     def test_home_page_post_button(self):
         response = self.client.get(reverse('home'))
-        self.assertContains(response, f'<a href="{reverse("post_form")}">')
+        self.assertContains(response, f'<a href="{reverse("posts:post_form")}">')
         self.assertContains(response, '<button id="create_post_button">')      
 
     def test_can_navigate_to_post_manager(self):
         response= self.client.get(reverse('home'))
 
-        self.assertContains(response, f'<a href="{reverse("post_manager")}"')
+        self.assertContains(response, f'<a href="{reverse("posts:post_manager")}"')
 
 header = 'header test'
 body = 'body test'    
@@ -85,13 +85,13 @@ def create_post(user, header=header, body= body, amount=1):
 class CreatePostTest(TestCase):
 
     def test_create_post_button_redirects_logged_out_user_to_signup(self):
-        response = self.client.get(reverse('post_form'))
+        response = self.client.get(reverse('posts:post_form'))
         self.assertRedirects(response, reverse('sign_up'))
 
     def test_create_post_button_renders_a_form_template_correctly_for_a_logged_in_user(self):
         user = User.objects.create(email= 'test@gmail.com',username= 'test')
         self.client.force_login(user)
-        response = self.client.get(reverse('post_form'))
+        response = self.client.get(reverse('posts:post_form'))
         self.assertTemplateUsed(response, 'posts/postForm.html')
         self.assertContains(response, '<form method="POST"')
         self.assertContains(response, '<input name="header_input"')
@@ -100,7 +100,7 @@ class CreatePostTest(TestCase):
     def test_can_submit_the_post_form_and_is_redirected(self):
         user = User.objects.create(email= 'test@gmail.com' ,username= 'test')
         self.client.force_login(user)
-        response = self.client.post(reverse('post_form'),
+        response = self.client.post(reverse('posts:post_form'),
                             data={'header_input': header, 'body_input': body})
         
         self.assertEqual(Post.objects.count(), 1, msg="Post object was not created. Maybe define the Post model fields?")
@@ -109,14 +109,14 @@ class CreatePostTest(TestCase):
 
         self.assertEqual(post_obj.header, header)
         self.assertEqual(post_obj.body, body)
-        self.assertRedirects(response, f'{reverse("post_view", args=[post_obj.id])}')
+        self.assertRedirects(response, f'{reverse("posts:post_view", args=[post_obj.id])}')
         
 
 class PostViewTest(TestCase):
     def test_post_view_displays_correct_post(self):
         user = User.objects.create(email= 'test@gmail.com',username= 'test')
         post_obj = create_post(user= user)
-        response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
+        response = self.client.get(f'{reverse("posts:post_view", args=[post_obj.id])}')
 
         self.assertTemplateUsed(response, 'posts/postView.html')
         self.assertEqual(response.context['header'], header)
@@ -127,7 +127,7 @@ class PostViewTest(TestCase):
     def test_post_view_allows_navigation_back_home(self):
         user = User.objects.create(email= 'test@gmail.com',username= 'test')
         post_obj = create_post(user= user)
-        response = self.client.get(f'{reverse("post_view", args=[post_obj.id])}')
+        response = self.client.get(f'{reverse("posts:post_view", args=[post_obj.id])}')
         self.assertContains(response, f'<a href="{reverse("home")}"')
         self.assertContains(response,'id="home_redirect"')
 
@@ -136,7 +136,7 @@ class PostManagerTest(TestCase):
     def test_post_manager_uses_the_correct_template(self):
         user = User.objects.create(email= 'test@gmail.com',username= 'test')
         self.client.force_login(user)
-        response= self.client.get(reverse('post_manager'))
+        response= self.client.get(reverse('posts:post_manager'))
 
         self.assertTemplateUsed(response, 'posts/postManager.html')
 
@@ -145,16 +145,16 @@ class PostManagerTest(TestCase):
         user = User.objects.create(email= 'test@gmail.com',username= 'test')
         self.client.force_login(user)
         post_objects= create_post(user=user, amount=2)
-        response= self.client.get(reverse('post_manager'))
+        response= self.client.get(reverse('posts:post_manager'))
 
         self.assertContains(response, "<html")
-        self.assertContains(response, f'<a href="{reverse("post_view", args=[post_objects[0].id])}"')
+        self.assertContains(response, f'<a href="{reverse("posts:post_view", args=[post_objects[0].id])}"')
         self.assertContains(response, post_objects[0].header)
-        self.assertContains(response, f'<a href="{reverse("post_view", args=[post_objects[1].id])}"')
+        self.assertContains(response, f'<a href="{reverse("posts:post_view", args=[post_objects[1].id])}"')
         self.assertContains(response, post_objects[1].header)
 
     def test_post_manager_redirects_to_login_page_if_user_is_loged_out(self):
-        response= self.client.get(reverse('post_manager'))
+        response= self.client.get(reverse('posts:post_manager'))
         self.assertRedirects(response, reverse('login'))
 
     def test_post_manager_only_displays_the_logged_in_users_posts(self):
@@ -165,7 +165,7 @@ class PostManagerTest(TestCase):
         post_obj2= create_post(user= user, header='smth', body='smth')
         self.client.force_login(user)
 
-        response= self.client.get(reverse('post_manager'))
+        response= self.client.get(reverse('posts:post_manager'))
 
         self.assertNotContains(response, post_obj1.header)
         self.assertContains(response, post_obj2.header)

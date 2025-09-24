@@ -39,7 +39,7 @@ class NewVisitorTest(LiveServerTestCase):
 
     def create_post(self, header='header test', body= 'body test'):
 
-        self.browser.get(f'{self.live_server_url}{reverse('post_form')}')
+        self.browser.get(f'{self.live_server_url}{reverse('posts:post_form')}')
         self.browser.find_element(By.ID, 'post_form')
         header_input = self.browser.find_element(By.NAME, 'header_input')
         body_input = self.browser.find_element(By.NAME, 'body_input')
@@ -161,7 +161,7 @@ class NewVisitorTest(LiveServerTestCase):
         
         # She goes to check her post in the My Posts section where she can only see her posts
 
-        self.browser.get(f'{self.live_server_url}{reverse('post_manager')}')
+        self.browser.get(f'{self.live_server_url}{reverse('posts:post_manager')}')
         posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts' )
         my_posts = [post.text for post in posts]
         self.assertNotIn('Why puppies are the best!', my_posts)

@@ -4,7 +4,7 @@
 <body>
     {% for post in posts %}
         <p class="my_posts">
-            <a href="{% url 'post_view' post.id %}">{{post.header}}</a>
+            <a href="{% url 'posts:post_view' post.id %}">{{post.header}}</a>
         </p>
     {% endfor %}
 </body>
