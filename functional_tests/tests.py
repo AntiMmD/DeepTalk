@@ -166,3 +166,20 @@ class NewVisitorTest(LiveServerTestCase):
         my_posts = [post.text for post in posts]
         self.assertNotIn('Why puppies are the best!', my_posts)
         self.assertIn('Why kitties are the best!', my_posts)
+
+class UsersDontSeeInternalErrors(NewVisitorTest):
+
+    # Farshid, Farshad's older brother heard about a cool site where he can create a post for others to read
+    # and wants to try it himself, he tries signing up; but because of him being a clumpsy silly goose
+    # he fais the first attempt because of a typo! He enters Farshad instead of Farshid in the email address!
+    
+    def test_users_are_informed_that_the_email_theyre_using_has_been_used_before_when_signing_up(self):
+        ## this is Farshad's account!
+        self.sign_up(email='Farshad@gmail.com', username='Farshad', password='1234')
+        self.browser.delete_all_cookies()
+        ## Farshid tries to sign up
+        self.sign_up(email='Farshad@gmail.com', username='Farshad', password='41148')
+        #He sees an error message in the sign_up page saying a user with this email already exsits
+
+        email_error = self.browser.find_element(By.ID, 'email_error').text
+        self.assertEqual('a user with this email address exists!', email_error.lower())
