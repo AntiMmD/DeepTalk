@@ -180,6 +180,10 @@ class UsersDontSeeInternalErrors(NewVisitorTest):
         ## Farshid tries to sign up
         self.sign_up(email='Farshad@gmail.com', username='Farshad', password='41148')
         #He sees an error message in the sign_up page saying a user with this email already exsits
-
         email_error = self.browser.find_element(By.ID, 'email_error').text
         self.assertEqual('a user with this email address exists!', email_error.lower())
+
+        # he tries again; but this time he doesn't use the correct username
+        self.sign_up(email='Farshid@gmail.com', username='Farshad', password='41148')
+        username_error = self.browser.find_element(By.ID, 'username_error').text
+        self.assertEqual('This username is taken!', username_error.lower())
