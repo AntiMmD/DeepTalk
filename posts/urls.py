@@ -1,0 +1,9 @@
+from django.urls import path
+from posts import views
+
+urlpatterns = [
+    path('new', views.post_form, name='post_form'),
+    path('posted/<int:id>', views.post_view, name= 'post_view'),
+    path('posted', views.post_manager, name='post_manager'),
+ ]
+
