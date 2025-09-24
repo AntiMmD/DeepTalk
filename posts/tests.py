@@ -191,3 +191,23 @@ class UserAndPostModelsTest(TestCase):
         saved_post_obj2= Post.objects.get(user= user2 )
         self.assertEqual(saved_post_obj1, post_obj1)
         self.assertEqual(saved_post_obj2, post_obj2)
+
+class ErrorHandling(TestCase):
+
+    def test_sign_up_view_displays_form_errors_to_users_in_the_signup_page(self):
+        self.client.post(reverse('sign_up'),
+                                data={'email_input': 'test@gmail.com',
+                                    'username_input':'user',
+                                    'password_input':'test'})
+        
+        response= self.client.post(reverse('sign_up'),
+                                data={'email_input': 'test@gmail.com',
+                                    'username_input':'user',
+                                    'password_input':'test'})
+        
+        self.assertTemplateUsed(response, 'posts/signUp.html')
+        self.assertContains(response, 'A user with this email address exists!')
+
+        
+
+        

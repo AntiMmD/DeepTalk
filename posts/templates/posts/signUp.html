@@ -4,6 +4,7 @@
 <body>
     <form method="POST">
         {% csrf_token %}
+        <p id="email_error" role="alert">{{ error }}</p>
         <table>
             <tr>
                 
