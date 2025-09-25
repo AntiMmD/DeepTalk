@@ -16,15 +16,15 @@ def sign_up(request):
         username= request.POST['username_input']
         password = request.POST['password_input']
 
-        try:
-            User.objects.get(email=email)
+        if User.objects.filter(email=email).exists():
             eamil_error = 'A user with this email address exists!'
             return render(request, 'posts/signUp.html', context={'error':eamil_error})
             
-        except:
+        else:
             user = User.objects.create_user(email=email,username=username, password=password)
             login(request, user)  
             return redirect('home')
+
     
     return render(request, 'posts/signUp.html')
 
