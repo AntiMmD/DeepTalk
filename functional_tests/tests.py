@@ -186,4 +186,4 @@ class UsersDontSeeInternalErrors(NewVisitorTest):
         # he tries again; but this time he doesn't use the correct username
         self.sign_up(email='Farshid@gmail.com', username='Farshad', password='41148')
         username_error = self.browser.find_element(By.ID, 'username_error').text
-        self.assertEqual('This username is taken!', username_error.lower())
+        self.assertEqual('this username is taken!', username_error.lower())
