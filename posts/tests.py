@@ -202,7 +202,7 @@ class ErrorHandling(TestCase):
         
         response= self.client.post(reverse('sign_up'),
                                 data={'email_input': 'test@gmail.com',
-                                    'username_input':'user',
+                                    'username_input':'smth',
                                     'password_input':'test'})
         
         self.assertTemplateUsed(response, 'posts/signUp.html')
@@ -213,6 +213,15 @@ class ErrorHandling(TestCase):
                                         'username_input':'user',
                                         'password_input':'test'})    
         self.assertTemplateUsed(response, 'posts/signUp.html') 
-        self.assertContains(response, 'This username is taken!')   
+        self.assertContains(response, 'This username is taken!') 
 
+        response= self.client.post(reverse('sign_up'),
+                                data={'email_input': 'test@gmail.com',
+                                    'username_input':'user',
+                                    'password_input':'test'})
+        self.assertTemplateUsed(response, 'posts/signUp.html')
+        self.assertContains(response, 'A user with this email address exists!')
+        self.assertContains(response, 'This username is taken!') 
+        
+        
         

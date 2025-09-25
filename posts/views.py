@@ -19,14 +19,24 @@ def sign_up(request):
         user_already_exsits=  User.objects.filter(Q(email= email)|Q(username= username)).first()
 
         if user_already_exsits:
-            if user_already_exsits.email == email:
-                error = 'A user with this email address exists!'
-                
             
-            else:
-                error = 'This username is taken!'
+            if user_already_exsits.email == email and user_already_exsits.username == username:
+                email_error = 'A user with this email address exists!'
+                username_error = 'This username is taken!'
                 
-            return render(request, 'posts/signUp.html', context={'error':error})
+                return render(request, 'posts/signUp.html',
+                            context={'email_error': email_error, 'username_error':username_error})
+
+            if user_already_exsits.email == email:
+                email_error = 'A user with this email address exists!'
+                username_error = ''
+            
+            if user_already_exsits.username == username:
+                username_error = 'This username is taken!'
+                email_error = ''
+
+            return render(request, 'posts/signUp.html',
+                           context={'email_error': email_error, 'username_error':username_error})
             
         user = User.objects.create_user(email=email,username=username, password=password)
         login(request, user)  
