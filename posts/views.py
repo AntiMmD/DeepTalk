@@ -4,7 +4,7 @@ from .models import Post
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model, login, authenticate
-from django.contrib.auth.views import LoginView
+from django.db.models import Q
 
 def home(request):
     return render(request, r'posts/home.html')
@@ -16,14 +16,21 @@ def sign_up(request):
         username= request.POST['username_input']
         password = request.POST['password_input']
 
-        if User.objects.filter(email=email).exists():
-            eamil_error = 'A user with this email address exists!'
-            return render(request, 'posts/signUp.html', context={'error':eamil_error})
+        user_already_exsits=  User.objects.filter(Q(email= email)|Q(username= username)).first()
+
+        if user_already_exsits:
+            if user_already_exsits.email == email:
+                error = 'A user with this email address exists!'
+                
             
-        else:
-            user = User.objects.create_user(email=email,username=username, password=password)
-            login(request, user)  
-            return redirect('home')
+            else:
+                error = 'This username is taken!'
+                
+            return render(request, 'posts/signUp.html', context={'error':error})
+            
+        user = User.objects.create_user(email=email,username=username, password=password)
+        login(request, user)  
+        return redirect('home')
 
     
     return render(request, 'posts/signUp.html')
