@@ -179,11 +179,16 @@ class UsersDontSeeInternalErrors(NewVisitorTest):
         self.browser.delete_all_cookies()
         ## Farshid tries to sign up
         self.sign_up(email='Farshad@gmail.com', username='Farshad', password='41148')
-        #He sees an error message in the sign_up page saying a user with this email already exsits
+        #He sees an error message in the sign_up page saying a user with this email and username already exsits
         email_error = self.browser.find_element(By.ID, 'email_error').text
+        username_error = self.browser.find_element(By.ID, 'username_error').text
         self.assertEqual('a user with this email address exists!', email_error.lower())
+        self.assertEqual('this username is taken!', username_error.lower())
 
         # he tries again; but this time he doesn't use the correct username
         self.sign_up(email='Farshid@gmail.com', username='Farshad', password='41148')
-        username_error = self.browser.find_element(By.ID, 'username_error').text
-        self.assertEqual('this username is taken!', username_error.lower())
+        self.assertNotIn('a user with this email address exists!', self.browser.page_source.lower())
+
+        # and again; this time with an incorrect email but a correct username
+        self.sign_up(email='Farshad@gmail.com', username='Farshid', password='41148')
+        self.assertNotIn('this username is taken!', self.browser.page_source.lower())
