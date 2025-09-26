@@ -8,15 +8,15 @@ class AuthenticationTest(TestCase):
         response = self.client.get(reverse('sign_up'))
         self.assertTemplateUsed(response, 'posts/signUp.html')
         self.assertContains(response, '<form method="POST"')
-        self.assertContains(response, '<input name="email_input"')
-        self.assertContains(response, '<input name="username_input"')
-        self.assertContains(response, '<input name="password_input"')
+        self.assertContains(response, 'name="email_input"')
+        self.assertContains(response, 'name="username_input"')
+        self.assertContains(response, 'name="password_input"')
 
     def test_can_submit_the_sign_up_form_and_is_redirected_to_home_being_authenticated(self):
         response = self.client.post(reverse('sign_up'),
-                                    data={'email_input': 'test@gmail.com',
-                                        'username_input':'user',
-                                        'password_input':'test'})
+                                    data={'email': 'test@gmail.com',
+                                        'username':'user',
+                                        'password':'test'})
         
         self.assertEqual(User.objects.all().count(), 1, msg="User object was not created.")
         self.assertTrue(response.wsgi_request.user.is_authenticated)
@@ -196,31 +196,31 @@ class ErrorHandling(TestCase):
 
     def test_sign_up_view_displays_form_errors_to_users_in_the_signup_page(self):
         self.client.post(reverse('sign_up'),
-                                data={'email_input': 'test@gmail.com',
-                                    'username_input':'user',
-                                    'password_input':'test'})
+                                data={'email': 'test@gmail.com',
+                                    'username':'user',
+                                    'password':'test'})
         
         response= self.client.post(reverse('sign_up'),
-                                data={'email_input': 'test@gmail.com',
-                                    'username_input':'smth',
-                                    'password_input':'test'})
+                                data={'email': 'test@gmail.com',
+                                    'username':'smth',
+                                    'password':'test'})
         
         self.assertTemplateUsed(response, 'posts/signUp.html')
-        self.assertContains(response, 'A user with this email address exists!')
+        self.assertContains(response, 'A user with this email already exists!')
 
         response= self.client.post(reverse('sign_up'),
-                                    data={'email_input': 'differentemail@gmail.com',
-                                        'username_input':'user',
-                                        'password_input':'test'})    
+                                    data={'email': 'differentemail@gmail.com',
+                                        'username':'user',
+                                        'password':'test'})    
         self.assertTemplateUsed(response, 'posts/signUp.html') 
         self.assertContains(response, 'This username is taken!') 
 
         response= self.client.post(reverse('sign_up'),
-                                data={'email_input': 'test@gmail.com',
-                                    'username_input':'user',
-                                    'password_input':'test'})
+                                data={'email': 'test@gmail.com',
+                                    'username':'user',
+                                    'password':'test'})
         self.assertTemplateUsed(response, 'posts/signUp.html')
-        self.assertContains(response, 'A user with this email address exists!')
+        self.assertContains(response, 'A user with this email already exists!')
         self.assertContains(response, 'This username is taken!') 
         
         

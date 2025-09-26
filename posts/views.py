@@ -5,37 +5,24 @@ from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model, login, authenticate
 from django.db.models import Q
-
+from .forms import SignUpForm
 def home(request):
-    return render(request, r'posts/home.html')
+    return render(request, 'posts/home.html')
 
 User = get_user_model()
 def sign_up(request):
     if request.method == 'POST':
-        email = request.POST['email_input']
-        username= request.POST['username_input']
-        password = request.POST['password_input']
-
-        user_already_exsits=  User.objects.filter(Q(email= email)|Q(username= username)).first()
-
-        
-        if user_already_exsits:
-            errors= {}
-            if user_already_exsits.email == email:
-                errors['email_error'] = 'A user with this email address exists!'
-            
-            if user_already_exsits.username == username:
-                errors['username_error'] = 'This username is taken!'
-
-            return render(request, 'posts/signUp.html',
-                           context=errors)
-            
-        user = User.objects.create_user(email=email,username=username, password=password)
-        login(request, user)  
-        return redirect('home')
-
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = SignUpForm()
     
-    return render(request, 'posts/signUp.html')
+    return render(request, 'posts/signUp.html', context={'form': form})     
 
 def log_in(request):
     if request.method == 'POST':
