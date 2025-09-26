@@ -4,6 +4,17 @@ from django.urls import reverse
 
 class AuthenticationTest(TestCase):
 
+    def sign_up(self, email='test@gmail.com', username='test', password= 'test',captcha_1= 'passed'):
+        with self.settings(CAPTCHA_TEST_MODE=True):
+            response = self.client.post(reverse('sign_up'),
+                                        data={'email': email,
+                                            'username':username,
+                                            'password':password,
+                                            'captcha_0': 'dummy',
+                                            'captcha_1':captcha_1})
+            return response
+
+
     def test_user_can_sign_up(self):
         response = self.client.get(reverse('sign_up'))
         self.assertTemplateUsed(response, 'posts/signUp.html')
@@ -14,12 +25,7 @@ class AuthenticationTest(TestCase):
 
     def test_can_submit_the_sign_up_form_and_is_redirected_to_home_being_authenticated(self):
         with self.settings(CAPTCHA_TEST_MODE=True):
-            response = self.client.post(reverse('sign_up'),
-                                        data={'email': 'test@gmail.com',
-                                            'username':'user',
-                                            'password':'test',
-                                            'captcha_0': 'dummy',
-                                            'captcha_1':'passed'})
+            response = self.sign_up()
         
         self.assertEqual(User.objects.all().count(), 1, msg="User object was not created.")
         self.assertTrue(response.wsgi_request.user.is_authenticated)
@@ -195,50 +201,31 @@ class UserAndPostModelsTest(TestCase):
         self.assertEqual(saved_post_obj1, post_obj1)
         self.assertEqual(saved_post_obj2, post_obj2)
 
-class ErrorHandling(TestCase):
+class ErrorHandling(AuthenticationTest):
 
     def test_sign_up_view_displays_captcha_error_when_the_captcha_is_filled_incorrectly(self):
-            with self.settings(CAPTCHA_TEST_MODE=True):
-                response = self.client.post(reverse('sign_up'),
-                                        data={'email': 'test@gmail.com',
-                                            'username':'user',
-                                            'password':'test',
-                                            'captcha_0': 'dummy',
-                                            'captcha_1':'NOTpassed'})
-                
-                self.assertContains(response, 'Invalid CAPTCHA')
+            response = self.sign_up(captcha_1='NOTpassed')                
+            self.assertContains(response, 'Invalid CAPTCHA')
                 
 
-    def test_sign_up_view_displays_form_errors_to_users_in_the_signup_page(self):
-        with self.settings(CAPTCHA_TEST_MODE=True):
-            self.client.post(reverse('sign_up'),
-                                    data={'email': 'test@gmail.com',
-                                        'username':'user',
-                                        'password':'test',
-                                        'captcha_0': 'dummy',
-                                        'captcha_1':'passed'})
-            
-            response= self.client.post(reverse('sign_up'),
-                                    data={'email': 'test@gmail.com',
-                                        'username':'smth',
-                                        'password':'test',
-                                        'captcha_0': 'dummy',
-                                        'captcha_1':'passed'})
-        
+    def test_user_is_informed_that_the_email_theyre_using_is_duplicant_when_only_the_email_is_duplicated(self):
+        self.sign_up() 
+
+        response = self.sign_up(username= 'smthElse')
         self.assertTemplateUsed(response, 'posts/signUp.html')
         self.assertContains(response, 'A user with this email already exists!')
 
-        response= self.client.post(reverse('sign_up'),
-                                    data={'email': 'differentemail@gmail.com',
-                                        'username':'user',
-                                        'password':'test'})    
+    def test_user_is_informed_that_the_username_theyre_using_is_duplicant_when_only_the_username_is_duplicated(self):
+        self.sign_up() 
+
+        response= self.sign_up(email='differentemail@gmail.com')   
         self.assertTemplateUsed(response, 'posts/signUp.html') 
         self.assertContains(response, 'This username is taken!') 
 
-        response= self.client.post(reverse('sign_up'),
-                                data={'email': 'test@gmail.com',
-                                    'username':'user',
-                                    'password':'test'})
+    def test_user_is_informed_that_the_username_and_email_theyre_using_is_duplicant_when_both_are_duplicated(self):
+        self.sign_up() 
+
+        response= self.sign_up()
         self.assertTemplateUsed(response, 'posts/signUp.html')
         self.assertContains(response, 'A user with this email already exists!')
         self.assertContains(response, 'This username is taken!') 
