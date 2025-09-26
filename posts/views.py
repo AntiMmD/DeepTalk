@@ -4,12 +4,13 @@ from .models import Post
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model, login, authenticate
-from django.db.models import Q
 from .forms import SignUpForm
-def home(request):
-    return render(request, 'posts/home.html')
-
 User = get_user_model()
+
+def home(request):
+    all_the_posts_in_the_world= Post.objects.all() 
+    return render(request, 'posts/home.html', context={'posts':all_the_posts_in_the_world})
+
 def sign_up(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)

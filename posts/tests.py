@@ -2,6 +2,19 @@ from django.test import TestCase
 from posts.models import Post,User
 from django.urls import reverse
 
+header = 'header test'
+body = 'body test'    
+def create_post(user, header=header, body= body, amount=1):
+    
+    if amount ==1:
+        post_obj = Post.objects.create(user=user, header=header, body=body)
+        return post_obj
+    
+    posts= [Post(user= user, header= header, body=body) for _ in range(0,amount)]
+    post_objects = Post.objects.bulk_create(posts)
+    return post_objects
+
+
 class AuthenticationTest(TestCase):
 
     def sign_up(self, email='test@gmail.com', username='test', password= 'test',captcha_1= 'passed'):
@@ -92,7 +105,7 @@ class ErrorHandlingTest(AuthenticationTest):
         self.assertContains(response, 'A user with this email already exists!')
         self.assertContains(response, 'This username is taken!') 
 
-class HomePageTest(TestCase):
+class HomePageTest(AuthenticationTest):
     
     def test_home_page_uses_home_template(self):
         response = self.client.get(reverse('home'))
@@ -108,18 +121,17 @@ class HomePageTest(TestCase):
 
         self.assertContains(response, f'<a href="{reverse("posts:post_manager")}"')
 
-header = 'header test'
-body = 'body test'    
-def create_post(user, header=header, body= body, amount=1):
-    
-    if amount ==1:
-        post_obj = Post.objects.create(user=user, header=header, body=body)
-        return post_obj
-    
-    posts= [Post(user= user, header= header, body=body) for _ in range(0,amount)]
-    post_objects = Post.objects.bulk_create(posts)
-    return post_objects
+    def test_home_page_feed_displays_users_posts(self):
+        user1 = User.objects.create_user(username='Farshad', email='Farshad@gmail.com')
+        user2 = User.objects.create_user(username='Sara', email='Sara@gmail.com')
 
+        create_post(user= user1, header= 'Puppies are the best')
+        create_post(user= user2, header= 'Kitties are the best')
+
+        response= self.client.get(reverse('home'))
+        self.assertContains(response, '<a id="feed_post"')
+        self.assertContains(response, 'Puppies are the best')
+        self.assertContains(response, 'Kitties are the best')
 
 class CreatePostTest(TestCase):
 
