@@ -123,4 +123,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "posts.User"
-CAPTCHA_TEST_MODE=True ## REMOVE THIS IN PRODUCTION !!!!!!!!!!!!!!!!!!!!
+
+import sys
+if 'test' in sys.argv:
+    CAPTCHA_TEST_MODE=True
