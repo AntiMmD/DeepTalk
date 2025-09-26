@@ -4,6 +4,9 @@ import time
 from django.test import LiveServerTestCase
 from django.urls import reverse
 from urllib.parse import urlparse
+from posts.models import Post
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
         # Farshad has recently heard about a cool website where he can write a blog post and share it with others
         # he opens his browser and checks the homepage 
@@ -152,28 +155,46 @@ class NewVisitorTest(LiveServerTestCase):
 
         #Farshad logs-in again and creates a post
         self.sign_up()
-        self.browser.delete_all_cookies() ## to simulate a new user
-        self.login()
-
         self.create_post(header='Why puppies are the best!',
                           body='Becasue they woof-woof all the time!')
         
-        # in the meantime, a new user, Sara is doing the same thing!
-
-        self.sign_up(email='sara@gmail.com', username='sara', password='sara')
-        self.browser.delete_all_cookies()
-        self.login(email='sara@gmail.com', password='sara') 
-        self.create_post(header='Why kitties are the best!', body='Cause they wanna watch the world burn :3')
-        
-        # She goes to check her post in the My Posts section where she can only see her posts
-
+        # he's not really in the mood to write more than he already did, so he just gazes into the screen 
+        #in the meantime a new user, Sara wants to try this awsome site!
+        self.browser.delete_all_cookies() ## to switch users
+        user = User.objects.create_user(username='sara', email='sara@gmail.com', password='sara')
+        post_obj= Post.objects.create(user=user,
+                                    header='Why kitties are the best!',
+                                    body='Cause they wanna watch the world burn :3')      
+          
+        # She goes to check her post in the My Posts section where she can only see her posts...
+        self.login(email='sara@gmail.com', password='sara')
         self.browser.get(f'{self.live_server_url}{reverse('posts:post_manager')}')
         posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts' )
         my_posts = [post.text for post in posts]
         self.assertNotIn('Why puppies are the best!', my_posts)
         self.assertIn('Why kitties are the best!', my_posts)
 
-class UsersDontSeeInternalErrors(NewVisitorTest):
+        # While Sara is checking her post, Farshad is keep refereshing the homepage to see if anyone
+        # has posted anything. it's lonesome to be the only user of the website after all
+        # and suddenly BANG! Farshad sees someone's post in the homepage!
+        # It's Sara's!  
+
+        self.browser.delete_all_cookies()
+        self.login() ## this must redirect to the homepage by default
+
+        feed_posts= self.browser.find_element(By.CLASS_NAME, 'feed_posts')
+        posts = feed_posts.find_elements(By.CLASS_NAME, 'post')
+        posts_contents= [post.text for post in posts]
+
+        self.assertIn('Why puppies are the best!', posts_contents)
+        self.assertIn('Why kitties are the best!',posts_contents)
+        # he clicks the post and navigates to see the full version of the post
+        posts[1].click()
+
+        self.assertEqual(urlparse(self.browser.current_url).path, reverse('posts:post_view', args=[post_obj.id]))
+
+
+class UsersDontSeeInternalErrorsTest(NewVisitorTest):
 
     # Farshid, Farshad's older brother heard about a cool site where he can create a post for others to read
     # and wants to try it himself, he tries signing up; but because of him being a clumpsy silly goose
