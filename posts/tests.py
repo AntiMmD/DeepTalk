@@ -13,10 +13,13 @@ class AuthenticationTest(TestCase):
         self.assertContains(response, 'name="password_input"')
 
     def test_can_submit_the_sign_up_form_and_is_redirected_to_home_being_authenticated(self):
-        response = self.client.post(reverse('sign_up'),
-                                    data={'email': 'test@gmail.com',
-                                        'username':'user',
-                                        'password':'test'})
+        with self.settings(CAPTCHA_TEST_MODE=True):
+            response = self.client.post(reverse('sign_up'),
+                                        data={'email': 'test@gmail.com',
+                                            'username':'user',
+                                            'password':'test',
+                                            'captcha_0': 'dummy',
+                                            'captcha_1':'passed'})
         
         self.assertEqual(User.objects.all().count(), 1, msg="User object was not created.")
         self.assertTrue(response.wsgi_request.user.is_authenticated)
@@ -194,16 +197,33 @@ class UserAndPostModelsTest(TestCase):
 
 class ErrorHandling(TestCase):
 
+    def test_sign_up_view_displays_captcha_error_when_the_captcha_is_filled_incorrectly(self):
+            with self.settings(CAPTCHA_TEST_MODE=True):
+                response = self.client.post(reverse('sign_up'),
+                                        data={'email': 'test@gmail.com',
+                                            'username':'user',
+                                            'password':'test',
+                                            'captcha_0': 'dummy',
+                                            'captcha_1':'NOTpassed'})
+                
+                self.assertContains(response, 'Invalid CAPTCHA')
+                
+
     def test_sign_up_view_displays_form_errors_to_users_in_the_signup_page(self):
-        self.client.post(reverse('sign_up'),
-                                data={'email': 'test@gmail.com',
-                                    'username':'user',
-                                    'password':'test'})
-        
-        response= self.client.post(reverse('sign_up'),
-                                data={'email': 'test@gmail.com',
-                                    'username':'smth',
-                                    'password':'test'})
+        with self.settings(CAPTCHA_TEST_MODE=True):
+            self.client.post(reverse('sign_up'),
+                                    data={'email': 'test@gmail.com',
+                                        'username':'user',
+                                        'password':'test',
+                                        'captcha_0': 'dummy',
+                                        'captcha_1':'passed'})
+            
+            response= self.client.post(reverse('sign_up'),
+                                    data={'email': 'test@gmail.com',
+                                        'username':'smth',
+                                        'password':'test',
+                                        'captcha_0': 'dummy',
+                                        'captcha_1':'passed'})
         
         self.assertTemplateUsed(response, 'posts/signUp.html')
         self.assertContains(response, 'A user with this email already exists!')

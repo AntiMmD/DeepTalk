@@ -27,15 +27,21 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser.find_element(By.ID, "submit").click()
 
     def sign_up(self,email= 'test@gmail.com',username= 'test',password='test1234'):
-        self.browser.get(f'{self.live_server_url}{reverse('sign_up')}')
-        email_input= self.browser.find_element(By.ID, "email_input")
-        username_input= self.browser.find_element(By.ID, "username_input")
-        password_input= self.browser.find_element(By.ID, "password_input")
-                
-        email_input.send_keys(email)
-        username_input.send_keys(username)
-        password_input.send_keys(password)
-        self.browser.find_element(By.ID, "submit_button").click()
+
+        ## remember to set CAPTCHA_TEST_MODE=True in the settings when testing
+        ## REMOVE IT IN PRODUCTION
+        with self.settings(CAPTCHA_TEST_MODE=True):
+            self.browser.get(f'{self.live_server_url}{reverse('sign_up')}')
+            email_input= self.browser.find_element(By.ID, "email_input")
+            username_input= self.browser.find_element(By.ID, "username_input")
+            password_input= self.browser.find_element(By.ID, "password_input")
+            
+            self.browser.find_element(By.NAME, "captcha_1").send_keys("passed")
+
+            email_input.send_keys(email)
+            username_input.send_keys(username)
+            password_input.send_keys(password)
+            self.browser.find_element(By.ID, "submit_button").click()
 
     def create_post(self, header='header test', body= 'body test'):
 
@@ -172,6 +178,11 @@ class UsersDontSeeInternalErrors(NewVisitorTest):
     # Farshid, Farshad's older brother heard about a cool site where he can create a post for others to read
     # and wants to try it himself, he tries signing up; but because of him being a clumpsy silly goose
     # he fais the first attempt because of a typo! He enters Farshad instead of Farshid in the email address!
+
+    def test_users_must_complete_a_captcha_when_signing_up(self):
+        self.sign_up()
+        url = self.browser.current_url
+        self.assertEqual(urlparse(url).path, reverse('home'))
     
     def test_users_are_informed_that_the_email_theyre_using_has_been_used_before_when_signing_up(self):
         ## this is Farshad's account!
