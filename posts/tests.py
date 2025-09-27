@@ -132,6 +132,18 @@ class HomePageTest(AuthenticationTest):
         self.assertContains(response, '<a id="feed_post"')
         self.assertContains(response, 'Puppies are the best')
         self.assertContains(response, 'Kitties are the best')
+    
+    def test_home_page_feed_posts_are_ordered_from_newer_to_older(self):
+        user1 = User.objects.create_user(username='Farshad', email='Farshad@gmail.com')
+        user2 = User.objects.create_user(username='Sara', email='Sara@gmail.com')
+
+        create_post(user= user1, header= 'Old Post')
+        create_post(user= user2, header= 'New Post')
+        response= self.client.get(reverse('home'))
+
+        posts_in_context = response.context['posts']
+        self.assertEqual(posts_in_context[0].header, 'New Post')
+        self.assertEqual(posts_in_context[1].header, 'Old Post')
 
 class CreatePostTest(TestCase):
 
@@ -242,4 +254,19 @@ class UserAndPostModelsTest(TestCase):
         saved_post_obj2= Post.objects.get(user= user2 )
         self.assertEqual(saved_post_obj1, post_obj1)
         self.assertEqual(saved_post_obj2, post_obj2)
-        
+
+    def test_post_has_a_created_at_field(self):
+        user1= User(email= 'user1@gmail.com', username='user1')
+        user1.save()
+        user2= User(email= 'user2@gmail.com',username='user2')
+        user2.save()
+
+        post_obj1 = Post()
+        post_obj1.user = user1
+        post_obj1.save()
+
+        post_obj2 = Post()
+        post_obj2.user = user2
+        post_obj2.save()
+
+        self.assertGreater(post_obj2.created_at, post_obj1.created_at)
