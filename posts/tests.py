@@ -5,7 +5,6 @@ from django.urls import reverse
 header = 'header test'
 body = 'body test'    
 def create_post(user, header=header, body= body, amount=1):
-    
     if amount ==1:
         post_obj = Post.objects.create(user=user, header=header, body=body)
         return post_obj
@@ -14,6 +13,13 @@ def create_post(user, header=header, body= body, amount=1):
     post_objects = Post.objects.bulk_create(posts)
     return post_objects
 
+class UserAndPostFactory(TestCase):
+    def setUp(self):
+        self.user1= User.objects.create_user(email= 'user1@gmail.com', username='user1')
+        self.user2= User.objects.create_user(email= 'user2@gmail.com',username='user2')
+
+        self.post_obj1= create_post(user=self.user1)
+        self.post_obj2 = create_post(user=self.user2, header='test2', body='test2')
 
 class AuthenticationTest(TestCase):
 
@@ -145,15 +151,15 @@ class HomePageTest(AuthenticationTest):
         self.assertEqual(posts_in_context[0].header, 'New Post')
         self.assertEqual(posts_in_context[1].header, 'Old Post')
 
-class CreatePostTest(TestCase):
+class CreatePostTest(UserAndPostFactory):
 
     def test_create_post_button_redirects_logged_out_user_to_signup(self):
         response = self.client.get(reverse('posts:post_form'))
         self.assertRedirects(response, reverse('sign_up'))
 
     def test_create_post_button_renders_a_form_template_correctly_for_a_logged_in_user(self):
-        user = User.objects.create(email= 'test@gmail.com',username= 'test')
-        self.client.force_login(user)
+
+        self.client.force_login(self.user1)
         response = self.client.get(reverse('posts:post_form'))
         self.assertTemplateUsed(response, 'posts/postForm.html')
         self.assertContains(response, '<form method="POST"')
@@ -161,25 +167,21 @@ class CreatePostTest(TestCase):
         self.assertContains(response, '<textarea name="body_input"')
     
     def test_can_submit_the_post_form_and_is_redirected(self):
-        user = User.objects.create(email= 'test@gmail.com' ,username= 'test')
-        self.client.force_login(user)
+        self.client.force_login(self.user1)
         response = self.client.post(reverse('posts:post_form'),
                             data={'header_input': header, 'body_input': body})
         
-        self.assertEqual(Post.objects.count(), 1, msg="Post object was not created. Maybe define the Post model fields?")
+        self.assertEqual(Post.objects.count(), 3, msg="Post object was not created. Maybe define the Post model fields?")
         
-        post_obj = Post.objects.last()  
+        post_obj = Post.objects.first() # because Post model's queryset ordering is set to ['-created_at']
 
         self.assertEqual(post_obj.header, header)
         self.assertEqual(post_obj.body, body)
         self.assertRedirects(response, f'{reverse("posts:post_view", args=[post_obj.id])}')
         
-
-class PostViewTest(TestCase):
+class PostViewTest(UserAndPostFactory):
     def test_post_view_displays_correct_post(self):
-        user = User.objects.create(email= 'test@gmail.com',username= 'test')
-        post_obj = create_post(user= user)
-        response = self.client.get(f'{reverse("posts:post_view", args=[post_obj.id])}')
+        response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
 
         self.assertTemplateUsed(response, 'posts/postView.html')
         self.assertEqual(response.context['header'], header)
@@ -188,85 +190,48 @@ class PostViewTest(TestCase):
         self.assertContains(response, '<p id="posted_body"')
     
     def test_post_view_allows_navigation_back_home(self):
-        user = User.objects.create(email= 'test@gmail.com',username= 'test')
-        post_obj = create_post(user= user)
-        response = self.client.get(f'{reverse("posts:post_view", args=[post_obj.id])}')
+        response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
+
         self.assertContains(response, f'<a href="{reverse("home")}"')
         self.assertContains(response,'id="home_redirect"')
 
-
-class PostManagerTest(TestCase):
+class PostManagerTest(UserAndPostFactory): 
     def test_post_manager_uses_the_correct_template(self):
-        user = User.objects.create(email= 'test@gmail.com',username= 'test')
-        self.client.force_login(user)
+        self.client.force_login(self.user1)
         response= self.client.get(reverse('posts:post_manager'))
 
         self.assertTemplateUsed(response, 'posts/postManager.html')
 
-
     def test_post_manager_has_the_correct_contents(self):
-        user = User.objects.create(email= 'test@gmail.com',username= 'test')
-        self.client.force_login(user)
-        post_objects= create_post(user=user, amount=2)
+        self.client.force_login(self.user1)
+        #the first post_obj of this user is already created in the factory
+        post_obj2= create_post(user=self.user1, header='second post')
         response= self.client.get(reverse('posts:post_manager'))
 
         self.assertContains(response, "<html")
-        self.assertContains(response, f'<a href="{reverse("posts:post_view", args=[post_objects[0].id])}"')
-        self.assertContains(response, post_objects[0].header)
-        self.assertContains(response, f'<a href="{reverse("posts:post_view", args=[post_objects[1].id])}"')
-        self.assertContains(response, post_objects[1].header)
+        self.assertContains(response, f'<a href="{reverse("posts:post_view", args=[self.post_obj1.id])}"')
+        self.assertContains(response, self.post_obj1.header)
+        self.assertContains(response, f'<a href="{reverse("posts:post_view", args=[post_obj2.id])}"')
+        self.assertContains(response,post_obj2.header)
 
     def test_post_manager_redirects_to_login_page_if_user_is_loged_out(self):
         response= self.client.get(reverse('posts:post_manager'))
+
         self.assertRedirects(response, reverse('login'))
 
     def test_post_manager_only_displays_the_logged_in_users_posts(self):
-        user = User.objects.create(email= 'test1@gmail.com',username= 'test1')
-        post_obj1= create_post(user=user) 
-
-        user = User.objects.create(email= 'test2@gmail.com',username= 'test2')
-        post_obj2= create_post(user= user, header='smth', body='smth')
-        self.client.force_login(user)
-
+        self.client.force_login(self.user2)
         response= self.client.get(reverse('posts:post_manager'))
 
-        self.assertNotContains(response, post_obj1.header)
-        self.assertContains(response, post_obj2.header)
+        self.assertNotContains(response, self.post_obj1.header)
+        self.assertContains(response, self.post_obj2.header)
         
-class UserAndPostModelsTest(TestCase):
-
+class UserAndPostModelsTest(UserAndPostFactory):
     def test_each_post_is_associated_with_a_user(self):
-        
-        user1= User(email= 'user1@gmail.com', username='user1')
-        user1.save()
-        user2= User(email= 'user2@gmail.com',username='user2')
-        user2.save()
-
-        post_obj1 = Post()
-        post_obj1.user = user1
-        post_obj1.save()
-
-        post_obj2 = Post()
-        post_obj2.user = user2
-        post_obj2.save()
-
-        saved_post_obj1= Post.objects.get(user= user1 )
-        saved_post_obj2= Post.objects.get(user= user2 )
-        self.assertEqual(saved_post_obj1, post_obj1)
-        self.assertEqual(saved_post_obj2, post_obj2)
+        saved_post_obj1= Post.objects.get(user= self.user1 )
+        saved_post_obj2= Post.objects.get(user= self.user2 )
+        self.assertEqual(saved_post_obj1, self.post_obj1)
+        self.assertEqual(saved_post_obj2,self. post_obj2)
 
     def test_post_has_a_created_at_field(self):
-        user1= User(email= 'user1@gmail.com', username='user1')
-        user1.save()
-        user2= User(email= 'user2@gmail.com',username='user2')
-        user2.save()
-
-        post_obj1 = Post()
-        post_obj1.user = user1
-        post_obj1.save()
-
-        post_obj2 = Post()
-        post_obj2.user = user2
-        post_obj2.save()
-
-        self.assertGreater(post_obj2.created_at, post_obj1.created_at)
+        self.assertGreater(self.post_obj2.created_at, self.post_obj1.created_at)
