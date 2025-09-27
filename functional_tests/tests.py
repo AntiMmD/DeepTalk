@@ -157,6 +157,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.sign_up()
         self.create_post(header='Why puppies are the best!',
                           body='Becasue they woof-woof all the time!')
+        time.sleep(0.1) 
         
         # he's not really in the mood to write more than he already did, so he just gazes into the screen 
         #in the meantime a new user, Sara wants to try this awsome site!
@@ -176,9 +177,8 @@ class NewVisitorTest(LiveServerTestCase):
 
         # While Sara is checking her post, Farshad is keep refereshing the homepage to see if anyone
         # has posted anything. it's lonesome to be the only user of the website after all
-        # and suddenly BANG! Farshad sees someone's post in the homepage!
-        # It's Sara's!  
-
+        # and suddenly BANG! Farshad sees his post and another user's post with the username "Sara"!
+ 
         self.browser.delete_all_cookies()
         self.login() ## this must redirect to the homepage by default
 
@@ -186,10 +186,13 @@ class NewVisitorTest(LiveServerTestCase):
         posts = feed_posts.find_elements(By.CLASS_NAME, 'post')
         posts_contents= [post.text for post in posts]
 
+        # the posts are ordered based on the publish date and time. newer to older
+        self.assertEqual(post_obj.header, posts_contents[0])
+
         self.assertIn('Why puppies are the best!', posts_contents)
         self.assertIn('Why kitties are the best!',posts_contents)
         # he clicks the post and navigates to see the full version of the post
-        posts[1].click()
+        posts[0].click()
 
         self.assertEqual(urlparse(self.browser.current_url).path, reverse('posts:post_view', args=[post_obj.id]))
 
