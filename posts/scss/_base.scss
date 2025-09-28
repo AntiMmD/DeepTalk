@@ -1,4 +1,7 @@
 @use 'linkModule';
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap');
+
+$font-primary: 'Nunito Sans', sans-serif;
 
 body{
   background-color: rgb(229, 227, 227);
@@ -9,6 +12,7 @@ body{
   /* border: 1px solid; */
   margin-right: 2%;
   margin-left: 2%;
+  align-items:center;
 }
 
 #home_redirect{
@@ -20,11 +24,22 @@ body{
     height: auto;      
 }
 
+#create_post_button {
+  font-family: $font-primary;
+  font-size: 11px;
+  color: white;               
+  background-color: #B48CC7;  
+  border: 3px solid #B48CC7;  
+  border-radius: 30px;
+}
+
 #my_posts {
+  font-family: $font-primary;
   @include linkModule.hide-link-features;
+  color: gray;
+  font-size: 14px;
   padding-left: 1%;
 }
 
 #create_post {
-  padding-left: 75%;
-}
+  padding-left: 73%;}
