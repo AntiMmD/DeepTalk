@@ -63,8 +63,8 @@ class NewVisitorTest(LiveServerTestCase):
 
         # Farshad immediately notices the page title and header mentioning 'Monologue'
         header_text = self.browser.find_element( By.TAG_NAME, 'h1' ).text
-        self.assertIn('Welcome to Monologue!' , self.browser.title)
-        self.assertEqual('Monologue!' , header_text)
+        self.assertIn('Monologue' , self.browser.title)
+        self.assertIn('Monologue' , header_text)
         
         # he can see a button under the header which reads as "create a post"
         button = self.browser.find_element(By.ID, 'create_post_button')

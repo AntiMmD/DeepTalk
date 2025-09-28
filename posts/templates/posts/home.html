@@ -1,9 +1,5 @@
-<!DOCTYPE html>
-<html>
-    <title>Welcome to Monologue!</title>
-
-    <body>
-        <h1>Monologue!</h1> 
+{% extends "posts/_base.html" %}
+    {% block body %}
         <a href="{% url 'posts:post_form' %}"><button id="create_post_button">Create a post</button></a>
         <a href="{% url 'posts:post_manager' %}" id="my_posts">My Posts</a>
         <div class="feed_posts">
@@ -13,5 +9,4 @@
                     </p>
                 {% endfor %}
         </div>
-    </body>
-</html>
+    {% endblock %}

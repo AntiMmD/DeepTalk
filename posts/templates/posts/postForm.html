@@ -1,6 +1,5 @@
-<!DOCTYPE html>
-<html>
-    <body>
+{% extends "posts/_base.html" %}
+    {% block body %}
         <form method="POST" id="post_form">
             {% csrf_token %}
             
@@ -13,5 +12,4 @@
             
             <button type="submit">Submit</button>
         </form>
-    </body>
-</html>
+    {% endblock %}

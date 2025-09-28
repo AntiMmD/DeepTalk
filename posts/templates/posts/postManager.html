@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<body>
-    {% for post in posts %}
-        <p class="my_posts">
-            <a href="{% url 'posts:post_view' post.id %}">{{post.header}}</a>
-        </p>
-    {% endfor %}
-</body>
-</html>
+{% extends "posts/_base.html" %}
+    {% block body %}
+        {% for post in posts %}
+            <p class="my_posts">
+                <a href="{% url 'posts:post_view' post.id %}">{{post.header}}</a>
+            </p>
+        {% endfor %}
+    {% endblock %}
