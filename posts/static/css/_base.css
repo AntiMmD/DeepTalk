@@ -1,14 +1,40 @@
+body {
+  background-color: rgb(229, 227, 227);
+}
+
 .top-bar {
   display: flex;
   /* border: 1px solid; */
+  margin-right: 2%;
+  margin-left: 2%;
+}
+
+#home_redirect {
+  text-decoration: none;
+}
+#home_redirect:link, #home_redirect:visited {
+  color: #B48CC7;
+  text-decoration: none;
+}
+
+#home_redirect img {
+  width: 100px;
+  height: auto;
 }
 
 #my_posts {
-  padding-left: 10px;
+  text-decoration: none;
+}
+#my_posts:link, #my_posts:visited {
+  color: #B48CC7;
+  text-decoration: none;
+}
+#my_posts {
+  padding-left: 1%;
 }
 
 #create_post {
-  padding-left: 880px;
+  padding-left: 75%;
 }
 
 /*# sourceMappingURL=_base.css.map */

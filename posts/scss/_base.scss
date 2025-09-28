@@ -1,13 +1,30 @@
+@use 'linkModule';
+
+body{
+  background-color: rgb(229, 227, 227);
+}
+
 .top-bar {
   display: flex;
   /* border: 1px solid; */
-
+  margin-right: 2%;
+  margin-left: 2%;
 }
 
-#my_posts{
-  padding-left: 10px;
+#home_redirect{
+  @include linkModule.hide-link-features;
 }
 
-#create_post{
-  padding-left: 880px;
+#home_redirect img {
+    width: 100px;      
+    height: auto;      
+}
+
+#my_posts {
+  @include linkModule.hide-link-features;
+  padding-left: 1%;
+}
+
+#create_post {
+  padding-left: 75%;
 }

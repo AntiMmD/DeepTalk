@@ -11,7 +11,9 @@
 </head>
 <body>
     <div class="top-bar">
-        <a href="{% url 'home' %}" id="home_redirect">Monologue!</a>
+        <a href="{% url 'home' %}" id="home_redirect">
+            <img src="{% static 'DeepTalkLogo.png' %}" alt="Logo" class="DeepTalkLogo">
+        </a>
         <a href="{% url 'posts:post_form' %}" id="create_post">
             <button id="create_post_button">Create a post</button>
         </a>         
