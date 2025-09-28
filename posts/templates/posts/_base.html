@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monologue</title>
+    {% load static %}
+        <link rel="stylesheet" href="{% static 'css/_base.css' %}">
     {% block css%}
     {% endblock %}
 </head>
 <body>
     <div class="top-bar">
         <a href="{% url 'home' %}" id="home_redirect">Monologue!</a>
+        <a href="{% url 'posts:post_form' %}" id="create_post">
+            <button id="create_post_button">Create a post</button>
+        </a>         
+
+        <a href="{% url 'posts:post_manager' %}" id="my_posts">My Posts</a>
         {% block topbar_right %}{% endblock %}
     </div>
     {% block body %}
