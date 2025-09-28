@@ -1,12 +1,26 @@
 {% extends "posts/_base.html" %}
+    {% load static %}
+    {% block css %}
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% endblock %}
+
+        {% block topbar_right %}
+            <a href="{% url 'posts:post_form' %}" id="create_post">
+                <button id="create_post_button">Create a post</button>
+            </a>
+            
+            <a href="{% url 'posts:post_manager' %}" id="my_posts">My Posts</a>
+        {% endblock %}
+
     {% block body %}
-        <a href="{% url 'posts:post_form' %}"><button id="create_post_button">Create a post</button></a>
-        <a href="{% url 'posts:post_manager' %}" id="my_posts">My Posts</a>
-        <div class="feed_posts">
-                {% for post in posts%}
-                    <p>
-                        <a id="feed_post"href="{% url 'posts:post_view' post.id %}" class="post">{{post.header}}</a>
-                    </p>
-                {% endfor %}
+        <div class="container">
+
+            <div class="feed_posts">
+                    {% for post in posts%}
+                        <p>
+                            <a id="feed_post"href="{% url 'posts:post_view' post.id %}" class="post">{{post.header}}</a>
+                        </p>
+                    {% endfor %}
+            </div>
         </div>
     {% endblock %}

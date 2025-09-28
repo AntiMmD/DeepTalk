@@ -119,7 +119,7 @@ class HomePageTest(AuthenticationTest):
 
     def test_home_page_post_button(self):
         response = self.client.get(reverse('home'))
-        self.assertContains(response, f'<a href="{reverse("posts:post_form")}">')
+        self.assertContains(response, reverse("posts:post_form"))
         self.assertContains(response, '<button id="create_post_button">')      
 
     def test_can_navigate_to_post_manager(self):

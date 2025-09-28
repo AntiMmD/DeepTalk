@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monologue</title>
+    {% block css%}
+    {% endblock %}
 </head>
 <body>
-    <h1>
-        <a href="{% url 'home' %}" id="home_redirect">
-            Monologue!
-        </a>
-    </h1>
+    <div class="top-bar">
+        <a href="{% url 'home' %}" id="home_redirect">Monologue!</a>
+        {% block topbar_right %}{% endblock %}
+    </div>
     {% block body %}
     {% endblock %}
 </body>
