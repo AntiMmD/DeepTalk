@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monologue</title>
+    <title>Deep Talk</title>
     {% load static %}
         <link rel="stylesheet" href="{% static 'css/_base.css' %}">
     {% block css%}
@@ -14,12 +14,14 @@
         <a href="{% url 'home' %}" id="home_redirect">
             <img src="{% static 'DeepTalkLogo.png' %}" alt="Logo" class="DeepTalkLogo">
         </a>
-        <a href="{% url 'posts:post_form' %}" id="create_post">
-            <button id="create_post_button">+ Create Post</button>
-        </a>         
 
-        <a href="{% url 'posts:post_manager' %}" id="my_posts">My Posts</a>
-        {% block topbar_right %}{% endblock %}
+        <div id="topbar_right">
+            <a href="{% url 'posts:post_form' %}" id="create_post">
+                <button id="create_post_button">+ Create Post</button>
+            </a>         
+
+            <a href="{% url 'posts:post_manager' %}" id="my_posts">My Posts</a>
+        </div>
     </div>
     {% block body %}
     {% endblock %}

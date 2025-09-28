@@ -5,23 +5,17 @@ body {
 
 .top-bar {
   display: flex;
-  /* border: 1px solid; */
+  margin-top: 2%;
   margin-right: 2%;
   margin-left: 2%;
   align-items: center;
+  justify-content: space-between;
 }
 
-#home_redirect {
-  text-decoration: none;
-}
-#home_redirect:link, #home_redirect:visited {
-  color: gray;
-  text-decoration: none;
-}
-
-#home_redirect img {
-  width: 100px;
-  height: auto;
+#topbar_right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 #create_post_button {
@@ -44,11 +38,19 @@ body {
 #my_posts {
   color: gray;
   font-size: 14px;
-  padding-left: 1%;
 }
 
-#create_post {
-  padding-left: 73%;
+#home_redirect {
+  text-decoration: none;
+}
+#home_redirect:link, #home_redirect:visited {
+  color: gray;
+  text-decoration: none;
+}
+
+#home_redirect img {
+  width: 100px;
+  height: auto;
 }
 
 /*# sourceMappingURL=_base.css.map */

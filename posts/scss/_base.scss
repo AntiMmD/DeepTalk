@@ -10,18 +10,17 @@ body{
 .top-bar {
   display: flex;
   /* border: 1px solid; */
+  margin-top: 2%;
   margin-right: 2%;
   margin-left: 2%;
-  align-items:center;
+  align-items: center;
+  justify-content: space-between
 }
 
-#home_redirect{
-  @include linkModule.hide-link-features;
-}
-
-#home_redirect img {
-    width: 100px;      
-    height: auto;      
+#topbar_right {
+  display: flex;       
+  gap: 10px;           
+  align-items: center; 
 }
 
 #create_post_button {
@@ -38,8 +37,13 @@ body{
   @include linkModule.hide-link-features;
   color: gray;
   font-size: 14px;
-  padding-left: 1%;
 }
 
-#create_post {
-  padding-left: 73%;}
+#home_redirect{
+  @include linkModule.hide-link-features;
+}
+
+#home_redirect img {
+    width: 100px;      
+    height: auto;      
+}
