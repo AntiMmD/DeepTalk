@@ -104,8 +104,6 @@ class NewVisitorTest(StaticLiveServerTestCase):
 
         # after creating the post, he clicks the submit button and it redirects him where he can see his post 
         self.browser.find_element(By.ID, 'submit').click()
-
-        print(f"Current URL after click: {self.browser.current_url}")
         posted_header= self.browser.find_element(By.ID, 'posted_header').text
         posted_body = self.browser.find_element(By.ID, 'posted_body').text
 
@@ -183,17 +181,19 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.login() ## this must redirect to the homepage by default
 
         feed_posts= self.browser.find_element(By.CLASS_NAME, 'feed_posts')
-        posts = feed_posts.find_elements(By.CLASS_NAME, 'post')
+        posts = feed_posts.find_elements(By.ID, 'post_header')
         posts_contents= [post.text for post in posts]
-
-        # the posts are ordered based on the publish date and time. newer to older
-        self.assertEqual(post_obj.header, posts_contents[0])
-
         self.assertIn('Why puppies are the best!', posts_contents)
         self.assertIn('Why kitties are the best!',posts_contents)
+        
+        # the posts are ordered based on the publish date and time. newer to older
+        self.assertEqual(post_obj.header, posts_contents[0])
+        # Farshad can see the author username on the post
+
+        self.assertEqual(post_obj.header, posts_contents[0])
+
         # he clicks the post and navigates to see the full version of the post
         posts[0].click()
-
         self.assertEqual(urlparse(self.browser.current_url).path, reverse('posts:post_view', args=[post_obj.id]))
 
 

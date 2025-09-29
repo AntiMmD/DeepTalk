@@ -1,12 +1,23 @@
 {% extends "posts/_base.html" %}
+    {% block css%}
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    {% endblock %}
 
     {% block body %}
         <div class="container">
             <div class="feed_posts">
                     {% for post in posts%}
-                        <p>
-                            <a id="feed_post"href="{% url 'posts:post_view' post.id %}" class="post">{{post.header}}</a>
-                        </p>
+                        <div id="feed_post">
+                                <div id="post_author">
+                                    {{post.user.username}}
+                                </div>
+                                <div class="post_header">
+                                    <h3><a href="{% url 'posts:post_view' post.id %}" id="post_header">
+                                        {{post.header}}
+                                    </a></h3>
+                                </div>
+                        </div>
                     {% endfor %}
             </div>
         </div>

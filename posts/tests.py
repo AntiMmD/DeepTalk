@@ -135,7 +135,7 @@ class HomePageTest(AuthenticationTest):
         create_post(user= user2, header= 'Kitties are the best')
 
         response= self.client.get(reverse('home'))
-        self.assertContains(response, '<a id="feed_post"')
+        self.assertContains(response, 'id="feed_post"')
         self.assertContains(response, 'Puppies are the best')
         self.assertContains(response, 'Kitties are the best')
     
@@ -150,6 +150,20 @@ class HomePageTest(AuthenticationTest):
         posts_in_context = response.context['posts']
         self.assertEqual(posts_in_context[0].header, 'New Post')
         self.assertEqual(posts_in_context[1].header, 'Old Post')
+
+    # def test_home_page_feed_posts_have_authors_username_on_them(self):
+    #     user1 = User.objects.create_user(username='Farshad', email='Farshad@gmail.com')
+    #     user2 = User.objects.create_user(username='Sara', email='Sara@gmail.com')
+
+    #     create_post(user= user1, header= 'Old Post')
+    #     create_post(user= user2, header= 'New Post')
+    #     response= self.client.get(reverse('home'))
+    #     posts_in_context = response.context['posts']
+
+    #     self.assertEqual(posts_in_context[0].user, user2)
+    #     self.assertEqual(posts_in_context[1].user, user1)
+
+
 
 class CreatePostTest(UserAndPostFactory):
 
