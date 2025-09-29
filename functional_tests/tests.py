@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
 from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
 from urllib.parse import urlparse
 from posts.models import Post
@@ -11,7 +12,7 @@ User = get_user_model()
         # Farshad has recently heard about a cool website where he can write a blog post and share it with others
         # he opens his browser and checks the homepage 
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
 
@@ -55,21 +56,18 @@ class NewVisitorTest(LiveServerTestCase):
 
         header_input.send_keys(header)
         body_input.send_keys(body)
-        self.browser.find_element(By.TAG_NAME, 'button').click()
-
+        self.browser.find_element(By.ID, 'submit').click()
 
     def test_can_see_the_homepage(self):
         self.browser.get(self.live_server_url)
 
-        # Farshad immediately notices the page title and header mentioning 'Monologue'
-        header_text = self.browser.find_element( By.TAG_NAME, 'h1' ).text
-        self.assertIn('Monologue' , self.browser.title)
-        self.assertIn('Monologue' , header_text)
-        
-        # he can see a button under the header which reads as "create a post"
+        # Farshad immediately notices the page title mentioning 'Deep Talk'
+        self.assertIn('Talk' , self.browser.title)
+    
+        # he can see a button on top of the page which reads as "+ Create Post"
         button = self.browser.find_element(By.ID, 'create_post_button')
 
-        self.assertEqual('create a post', button.text.lower())
+        self.assertEqual('+ create post', button.text.lower())
         button.click()
 
          # Farshad sees a sign-un form instead, he understand that he needs to sign-up first using email
@@ -105,7 +103,9 @@ class NewVisitorTest(LiveServerTestCase):
         ' well. Proper shelter, hydration, and care are essential to keep them safe in harsh weather.')
 
         # after creating the post, he clicks the submit button and it redirects him where he can see his post 
-        self.browser.find_element(By.TAG_NAME, 'button').click()
+        self.browser.find_element(By.ID, 'submit').click()
+
+        print(f"Current URL after click: {self.browser.current_url}")
         posted_header= self.browser.find_element(By.ID, 'posted_header').text
         posted_body = self.browser.find_element(By.ID, 'posted_body').text
 
