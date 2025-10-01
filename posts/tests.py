@@ -135,7 +135,7 @@ class HomePageTest(AuthenticationTest):
         create_post(user= user2, header= 'Kitties are the best')
 
         response= self.client.get(reverse('home'))
-        self.assertContains(response, 'id="feed_post"')
+        self.assertContains(response, 'class="feed_post"')
         self.assertContains(response, 'Puppies are the best')
         self.assertContains(response, 'Kitties are the best')
     

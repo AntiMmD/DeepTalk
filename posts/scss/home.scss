@@ -9,16 +9,16 @@ $font-primary: 'Nunito Sans', sans-serif;
   margin-right: 15%;
 }
 
-#feed_post h3 {
+.feed_post h3 {
   margin-bottom: 2%;
 }
 
-#feed_post {
+.feed_post {
     border-bottom: 1px solid #D5D5D5;
     margin-left: 2%;
 }
 
-#post_author{
+.post_author{
     margin-top: 1%;
     margin-bottom: -2.5%;
     padding-left: 2%;
@@ -27,7 +27,7 @@ $font-primary: 'Nunito Sans', sans-serif;
     font-size: 10px;
 }
 
-#post_header {
+.post_header a{
     @include linkModule.hide-link-features;
     padding-left: 2%;
     color: black;

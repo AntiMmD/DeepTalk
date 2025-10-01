@@ -8,12 +8,12 @@
         <div class="container">
             <div class="feed_posts">
                     {% for post in posts%}
-                        <div id="feed_post">
-                                <div id="post_author">
+                        <div class="feed_post">
+                                <div class="post_author">
                                     {{post.user.username}}
                                 </div>
                                 <div class="post_header">
-                                    <h3><a href="{% url 'posts:post_view' post.id %}" id="post_header">
+                                    <h3><a href="{% url 'posts:post_view' post.id %}">
                                         {{post.header}}
                                     </a></h3>
                                 </div>
