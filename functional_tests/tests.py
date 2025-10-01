@@ -152,7 +152,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
     def test_multiple_users_can_use_the_site_without_interfering_each_other(self):
 
         #Farshad logs-in again and creates a post
-        self.sign_up()
+        self.sign_up(username='Farshad')
         self.create_post(header='Why puppies are the best!',
                           body='Becasue they woof-woof all the time!')
         time.sleep(0.1) 
@@ -160,10 +160,8 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # he's not really in the mood to write more than he already did, so he just gazes into the screen 
         #in the meantime a new user, Sara wants to try this awsome site!
         self.browser.delete_all_cookies() ## to switch users
-        user = User.objects.create_user(username='sara', email='sara@gmail.com', password='sara')
-        post_obj= Post.objects.create(user=user,
-                                    header='Why kitties are the best!',
-                                    body='Cause they wanna watch the world burn :3')      
+        user =User.objects.create_user(username='Sara', email='sara@gmail.com', password='sara')
+        post_obj= Post.objects.create(user= user,header='Why kitties are the best!',body='Cause they wanna watch the world burn :3')
           
         # She goes to check her post in the My Posts section where she can only see her posts...
         self.login(email='sara@gmail.com', password='sara')
@@ -179,21 +177,23 @@ class NewVisitorTest(StaticLiveServerTestCase):
  
         self.browser.delete_all_cookies()
         self.login() ## this must redirect to the homepage by default
-
-        feed_posts= self.browser.find_element(By.CLASS_NAME, 'feed_posts')
-        posts = feed_posts.find_elements(By.ID, 'post_header')
-        posts_contents= [post.text for post in posts]
-        self.assertIn('Why puppies are the best!', posts_contents)
-        self.assertIn('Why kitties are the best!',posts_contents)
         
         # the posts are ordered based on the publish date and time. newer to older
-        self.assertEqual(post_obj.header, posts_contents[0])
         # Farshad can see the author username on the post
 
-        self.assertEqual(post_obj.header, posts_contents[0])
+        feed_post= self.browser.find_elements(By.CLASS_NAME, 'feed_post')
+
+        post_header = self.browser.find_elements(By.CLASS_NAME, 'post_header')
+        post_author = self.browser.find_elements(By.CLASS_NAME, 'post_author')
+
+        headers = ['Why kitties are the best!', 'Why puppies are the best!']
+        authors = ['Sara', 'Farshad']
+        for i in range(0, len(feed_post)):
+            self.assertEqual(headers[i],post_header[i].text)
+            self.assertEqual(authors[i], post_author[i].text)
 
         # he clicks the post and navigates to see the full version of the post
-        posts[0].click()
+        post_header[0].find_element(By.TAG_NAME, 'a').click()
         self.assertEqual(urlparse(self.browser.current_url).path, reverse('posts:post_view', args=[post_obj.id]))
 
 
