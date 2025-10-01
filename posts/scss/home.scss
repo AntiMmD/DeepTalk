@@ -34,3 +34,16 @@ $font-primary: 'Nunito Sans', sans-serif;
     font-family: $font-primary;
     font-size: clamp(1rem, 2vw, 2rem);
 }
+
+.post_contents{
+  padding-left: 2%;
+  margin-top: -2%;
+  margin-bottom:2% ;
+  font-family: $font-primary;
+  font-size: clamp(0.5rem, 0.8vw, 1.5rem);
+}
+
+.post_contents a{
+  color: black;
+  font-weight: bold;
+}

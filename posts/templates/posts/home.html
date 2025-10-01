@@ -17,6 +17,10 @@
                                         {{post.header}}
                                     </a></h3>
                                 </div>
+                                <div class="post_contents">
+                                    {{post.body|slice:':150'}}
+                                    <a href="{% url 'posts:post_view' post.id %}">Read More...</a>
+                                </div>
                         </div>
                     {% endfor %}
             </div>
