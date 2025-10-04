@@ -51,6 +51,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 ROOT_URLCONF = 'Blog.urls'
 
 TEMPLATES = [
@@ -125,5 +129,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "posts.User"
 
 import sys
-if 'test' in sys.argv:
+TESTING = "test" in sys.argv
+
+if not TESTING:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+
+if TESTING:
     CAPTCHA_TEST_MODE=True
