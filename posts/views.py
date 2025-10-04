@@ -5,11 +5,15 @@ from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model, login, authenticate
 from .forms import SignUpForm
+from django.core.paginator import Paginator
 User = get_user_model()
 
 def home(request):
-    all_the_posts_in_the_world= Post.objects.all() 
-    return render(request, 'posts/home.html', context={'posts':all_the_posts_in_the_world})
+    all_the_posts_in_the_world = Post.objects.select_related('user').all()
+    paginator = Paginator(all_the_posts_in_the_world, 5)
+    page_number = request.GET.get("page")
+    posts = paginator.get_page(page_number)
+    return render(request, 'posts/home.html', context={'posts':posts})
 
 def sign_up(request):
     if request.method == 'POST':

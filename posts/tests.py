@@ -163,6 +163,37 @@ class HomePageTest(AuthenticationTest):
     #     self.assertEqual(posts_in_context[0].user, user2)
     #     self.assertEqual(posts_in_context[1].user, user1)
 
+class PaginationTest(UserAndPostFactory):
+    """Test pagination behavior without hardcoding page size"""
+    
+    def setUp(self):
+        super().setUp()
+        self.user = User.objects.create_user(
+            email='pagtest@gmail.com', 
+            username='pagtest'
+        )
+
+        create_post(user=self.user, amount=60)
+    
+    def test_home_page_displays_pagination_controls(self):
+        response = self.client.get(reverse('home'))
+        
+        self.assertContains(response, '<nav>')
+        self.assertContains(response, 'class="pagination"')
+        
+        self.assertContains(response, '?page=')
+
+    def test_pagination_respects_page_parameter(self):
+        """Different pages show different content"""
+        response_page1 = self.client.get(reverse('home') + '?page=1')
+        response_page2 = self.client.get(reverse('home') + '?page=2')
+        
+        posts_page1 = set(p.id for p in response_page1.context['posts'])
+        posts_page2 = set(p.id for p in response_page2.context['posts'])
+        
+        # Pages should not overlap
+        self.assertEqual(len(posts_page1.intersection(posts_page2)), 0,
+                        "Pages should display different posts")
 
 
 class CreatePostTest(UserAndPostFactory):

@@ -16,6 +16,8 @@ $font-primary: 'Nunito Sans', sans-serif;
 .feed_post {
     border-bottom: 1px solid #D5D5D5;
     margin-left: 2%;
+    background-color: white;
+    border-radius: 10px;
 }
 
 .post_author{
@@ -46,4 +48,35 @@ $font-primary: 'Nunito Sans', sans-serif;
 .post_contents a{
   color: black;
   font-weight: bold;
+}
+
+
+nav {
+  border-top: 1px solid #eeeeee;
+  margin-top: 1em;
+  padding-top: 0.5em;
+  font: 1.2em $font-primary;
+
+  display: flex;
+  justify-content: center;
+}
+
+.pagination {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.pagination li {
+  margin: 0 1px;
+}
+
+.pagination a {
+  display: block;
+  padding: 0.5em 1em;
+  border: 1px solid #999999;
+  border-radius: 0.2em;
+  @include linkModule.hide-link-features;
+  color: rgb(72, 69, 69);
 }

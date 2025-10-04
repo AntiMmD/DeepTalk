@@ -25,4 +25,46 @@
                     {% endfor %}
             </div>
         </div>
-    {% endblock %}
+
+        <!-- {{posts}}
+        has previous: {{posts.has_previous}}
+        has next: {{posts.has_next}}
+        current page: {{posts.number}}
+        total pages: {{posts.paginator.num_pages}}
+        <hr><br>
+        {{posts.nex_page_number}}<br> -->
+
+
+
+
+        <nav>
+            <span id="page_number">Page {{posts.number}} of {{posts.paginator.num_pages}}</span> 
+        </nav>
+
+        <nav>
+            <ul class="pagination">
+                {% if posts.has_previous %}
+                    <li>
+                        <a href="?page=1">&laquo;</a>
+                    </li>
+                {% endif %}
+
+                {% for page_num in posts.paginator.page_range %}
+
+                        {% if page_num >= posts.number|add:'-1' and page_num <= posts.number|add:'2' %}
+                            <li>
+                                <a href="?page={{ page_num }}">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+
+                {% endfor %}
+
+                {% if posts.has_next %}
+                    <li>
+                        <a href="?page={{ posts.paginator.num_pages }}">&raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+            {% endblock %}
