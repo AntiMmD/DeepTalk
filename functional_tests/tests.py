@@ -196,6 +196,40 @@ class NewVisitorTest(StaticLiveServerTestCase):
         post_header[0].find_element(By.TAG_NAME, 'a').click()
         self.assertEqual(urlparse(self.browser.current_url).path, reverse('posts:post_view', args=[post_obj.id]))
 
+    def test_user_can_navigate_through_paginated_posts(self):
+        """Users can browse multiple pages of posts"""
+        # Create many posts
+        user = User.objects.create_user(
+            username='prolific_writer',
+            email='writer@gmail.com',
+            password='pass'
+        )
+        for i in range(25):
+            Post.objects.create(
+                user=user,
+                header=f'Post {i}',
+                body=f'Body {i}'
+            )
+        
+        self.browser.get(self.live_server_url)
+        
+        # Should see pagination
+        pagination = self.browser.find_element(By.CLASS_NAME, 'pagination')
+        self.assertTrue(pagination.is_displayed())
+        
+        # Get first post header on page 1
+        first_post = self.browser.find_element(By.CLASS_NAME, 'post_header').text
+        
+        # Navigate to page 2
+        page2_link = self.browser.find_element(By.LINK_TEXT, '2')
+        page2_link.click()
+        
+        # Should be on page 2 now
+        self.assertIn('page=2', self.browser.current_url)
+        
+        # Should see different posts
+        first_post_page2 = self.browser.find_element(By.CLASS_NAME, 'post_header').text
+        self.assertNotEqual(first_post, first_post_page2)
 
 class UsersDontSeeInternalErrorsTest(NewVisitorTest):
 
