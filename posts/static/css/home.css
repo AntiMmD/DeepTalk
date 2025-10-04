@@ -6,15 +6,14 @@
   margin-right: 15%;
 }
 
-.feed_post h3 {
-  margin-bottom: 2%;
-}
-
 .feed_post {
   border-bottom: 1px solid #D5D5D5;
   margin-left: 2%;
   background-color: white;
   border-radius: 10px;
+}
+.feed_post h3 {
+  margin-bottom: 2%;
 }
 
 .post_author {
@@ -46,7 +45,6 @@
   font-family: "Nunito Sans", sans-serif;
   font-size: clamp(0.5rem, 0.8vw, 1.5rem);
 }
-
 .post_contents a {
   color: black;
   font-weight: bold;
@@ -67,11 +65,9 @@ nav {
   padding: 0;
   display: flex;
 }
-
 .pagination li {
   margin: 0 1px;
 }
-
 .pagination a {
   display: block;
   padding: 0.5em 1em;
