@@ -60,8 +60,15 @@ def post_view(request, id):
     return render(request, 'posts/postView.html', context={'post': post_obj})
 
 def delete_post(request, id):
-    Post.objects.filter(id=id).delete()
-    return redirect(reverse('posts:post_manager'))
+    post_obj=  Post.objects.select_related('user').get(id= id)
+    if request.user == post_obj.user:
+        post_obj.delete()
+        return redirect(reverse('posts:post_manager'))
+    else:
+        return render(request, 'posts/postView.html', 
+                      context={'post': post_obj,
+                               'error':"You can't delete someone else's post dummy!"})
+
 
 def post_manager(request):
     if request.user.is_authenticated:

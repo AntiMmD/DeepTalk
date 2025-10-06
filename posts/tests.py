@@ -289,6 +289,12 @@ class PostViewTest(UserAndPostFactory):
         self.assertNotContains(response, self.post_obj1.header)
         self.assertFalse(Post.objects.filter(id=self.post_obj1.id).exists()) 
 
+    def test_post_views_delete_button_only_deletes_the_post_of_the_author_not_other_users(self):
+        self.client.login(email='user1@gmail.com', password='1234')
+        response = self.client.post(reverse('posts:delete_post', args=[self.post_obj2.id]), follow=True)
+        self.assertTrue(Post.objects.filter(id=self.post_obj2.id).exists()) 
+        self.assertContains(response, "You can't delete someone else's post dummy!", html=True)
+
 
 
 
