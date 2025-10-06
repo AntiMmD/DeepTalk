@@ -141,11 +141,21 @@ class NewVisitorTest(StaticLiveServerTestCase):
         for post in posts:
             self.assertIn(post.text, headers)
 
-
-
         # he clicks on his first post and navigates to see the details of the post 
-        
-        # self.fail('finish the test')
+        post_link = posts[0].find_element(By.TAG_NAME, 'a')
+        post_link.click()
+
+        # in the post page he can delete or edit the post using delete and edit buttons 
+        delete_button= self.browser.find_element(By.ID, 'delete_post')
+        self.browser.find_element(By.ID, 'edit_post')
+
+        # and he decised to delete the post
+        delete_button.click()
+        self.assertEqual(urlparse(self.browser.current_url).path, reverse('posts:post_manager'))
+
+        posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts')
+        for post in posts:
+            self.assertNotEqual('Why puppies are the best!', post.text)
 
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
 
