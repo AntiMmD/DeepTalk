@@ -1,8 +1,15 @@
 {% extends "posts/_base.html" %}
     {% block body %}
         <h2>
-            <p id="posted_header">{{header}}</p>
+            <p id="posted_header">{{post.header}}</p>
         </h2>
         
-        <p id="posted_body">{{body}}</p>
+        <p id="posted_body">{{post.body}}</p>
+
+        <form action="{% url 'posts:delete_post' post.id %}" method="post">
+            {% csrf_token %}
+                <button id="delete_post" type="submit">Delete</button>
+        </form>
+
+        <button id="edit_post" type="submit">Edit</button>
     {% endblock %}

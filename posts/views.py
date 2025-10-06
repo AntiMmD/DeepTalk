@@ -57,9 +57,11 @@ def post_form(request):
 
 def post_view(request, id):
     post_obj= Post.objects.get(id=id)
-    post_header = post_obj.header
-    post_body = post_obj.body
-    return render(request, 'posts/postView.html', context={'header':post_header, 'body':post_body})
+    return render(request, 'posts/postView.html', context={'post': post_obj})
+
+def delete_post(request, id):
+    Post.objects.filter(id=id).delete()
+    return redirect(reverse('posts:post_manager'))
 
 def post_manager(request):
     if request.user.is_authenticated:

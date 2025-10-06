@@ -13,13 +13,17 @@ def create_post(user, header=header, body= body, amount=1):
     post_objects = Post.objects.bulk_create(posts)
     return post_objects
 
+
+
 class UserAndPostFactory(TestCase):
     def setUp(self):
-        self.user1= User.objects.create_user(email= 'user1@gmail.com', username='user1')
-        self.user2= User.objects.create_user(email= 'user2@gmail.com',username='user2')
+        self.user1= User.objects.create_user(email= 'user1@gmail.com', username='user1',password='1234')
+        self.user2= User.objects.create_user(email= 'user2@gmail.com',username='user2',password='1234')
 
         self.post_obj1= create_post(user=self.user1)
         self.post_obj2 = create_post(user=self.user2, header='test2', body='test2')
+
+
 
 class AuthenticationTest(TestCase):
 
@@ -80,6 +84,8 @@ class AuthenticationTest(TestCase):
         self.assertTrue(user.check_password('test1234'))
         self.assertRedirects(response, reverse('home'))
 
+
+
 class ErrorHandlingTest(AuthenticationTest):
 
     def test_sign_up_view_displays_captcha_error_when_the_captcha_is_filled_incorrectly(self):
@@ -110,6 +116,8 @@ class ErrorHandlingTest(AuthenticationTest):
         self.assertTemplateUsed(response, 'posts/signUp.html')
         self.assertContains(response, 'A user with this email already exists!')
         self.assertContains(response, 'This username is taken!') 
+
+
 
 class HomePageTest(AuthenticationTest):
     
@@ -151,17 +159,7 @@ class HomePageTest(AuthenticationTest):
         self.assertEqual(posts_in_context[0].header, 'New Post')
         self.assertEqual(posts_in_context[1].header, 'Old Post')
 
-    # def test_home_page_feed_posts_have_authors_username_on_them(self):
-    #     user1 = User.objects.create_user(username='Farshad', email='Farshad@gmail.com')
-    #     user2 = User.objects.create_user(username='Sara', email='Sara@gmail.com')
 
-    #     create_post(user= user1, header= 'Old Post')
-    #     create_post(user= user2, header= 'New Post')
-    #     response= self.client.get(reverse('home'))
-    #     posts_in_context = response.context['posts']
-
-    #     self.assertEqual(posts_in_context[0].user, user2)
-    #     self.assertEqual(posts_in_context[1].user, user1)
 
 class PaginationTest(UserAndPostFactory):
     """Test pagination behavior without hardcoding page size"""
@@ -196,6 +194,7 @@ class PaginationTest(UserAndPostFactory):
                         "Pages should display different posts")
 
 
+
 class CreatePostTest(UserAndPostFactory):
 
     def test_create_post_button_redirects_logged_out_user_to_signup(self):
@@ -224,21 +223,7 @@ class CreatePostTest(UserAndPostFactory):
         self.assertEqual(post_obj.body, body)
         self.assertRedirects(response, f'{reverse("posts:post_view", args=[post_obj.id])}')
         
-class PostViewTest(UserAndPostFactory):
-    def test_post_view_displays_correct_post(self):
-        response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
 
-        self.assertTemplateUsed(response, 'posts/postView.html')
-        self.assertEqual(response.context['header'], header)
-        self.assertEqual(response.context['body'], body )
-        self.assertContains(response, '<p id="posted_header"')
-        self.assertContains(response, '<p id="posted_body"')
-    
-    def test_post_view_allows_navigation_back_home(self):
-        response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
-
-        self.assertContains(response, f'<a href="{reverse("home")}"')
-        self.assertContains(response,'id="home_redirect"')
 
 class PostManagerTest(UserAndPostFactory): 
     def test_post_manager_uses_the_correct_template(self):
@@ -270,7 +255,43 @@ class PostManagerTest(UserAndPostFactory):
 
         self.assertNotContains(response, self.post_obj1.header)
         self.assertContains(response, self.post_obj2.header)
-        
+
+
+
+class PostViewTest(UserAndPostFactory):
+    def test_post_view_displays_correct_post(self):
+        response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
+
+        self.assertTemplateUsed(response, 'posts/postView.html')
+        self.assertEqual(response.context['post'].header, header)
+        self.assertEqual(response.context['post'].body, body )
+        self.assertContains(response, '<p id="posted_header"')
+        self.assertContains(response, '<p id="posted_body"')
+    
+    def test_post_view_allows_navigation_back_home(self):
+        response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
+
+        self.assertContains(response, f'<a href="{reverse("home")}"')
+        self.assertContains(response,'id="home_redirect"')
+    
+    def test_post_view_has_delete_button(self):
+        response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
+        self.assertContains(response, f'<button id="delete_post"')
+    
+    def test_post_views_delete_button_redirects_to_post_manager_page(self):
+        self.client.login(email='user1@gmail.com', password='1234')
+        response = self.client.post(reverse('posts:delete_post', args=[self.post_obj1.id]))
+        self.assertRedirects(response, reverse('posts:post_manager'))
+
+    def test_post_views_delete_button_deletes_the_post(self):
+        self.client.login(email='user1@gmail.com', password='1234')
+        response = self.client.post(reverse('posts:delete_post', args=[self.post_obj1.id]), follow=True)
+        self.assertNotContains(response, self.post_obj1.header)
+        self.assertFalse(Post.objects.filter(id=self.post_obj1.id).exists()) 
+
+
+
+
 class UserAndPostModelsTest(UserAndPostFactory):
     def test_each_post_is_associated_with_a_user(self):
         saved_post_obj1= Post.objects.get(user= self.user1 )
