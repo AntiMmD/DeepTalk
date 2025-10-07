@@ -294,7 +294,37 @@ class PostViewTest(UserAndPostFactory):
         response = self.client.post(reverse('posts:delete_post', args=[self.post_obj2.id]), follow=True)
         self.assertTrue(Post.objects.filter(id=self.post_obj2.id).exists()) 
         self.assertContains(response, "You can't delete someone else's post dummy!", html=True)
+    
+    def test_post_views_edit_button_displays_a_prefilled_post_form(self):
+        self.client.login(email='user1@gmail.com', password='1234')
+        response = self.client.get(reverse('posts:edit_post', args=[self.post_obj1.id]))
+        self.assertIn('header test', response.content.decode())
+        self.assertIn('body test', response.content.decode())
+    
 
+    def test_edit_post_updates_post(self):
+        self.client.login(email='user1@gmail.com', password='1234')
+        new_header = "Updated Header"
+        new_body = "Updated body content"
+
+        response = self.client.post(
+            reverse('posts:edit_post', args=[self.post_obj1.id]),
+            data={
+                'header_input': new_header,
+                'body_input': new_body
+            }
+        )
+        self.post_obj1.refresh_from_db()
+
+        self.assertEqual(self.post_obj1.header, new_header)
+        self.assertEqual(self.post_obj1.body, new_body)
+        self.assertRedirects(response, reverse('posts:post_view', args=[self.post_obj1.id]))
+
+    def test_post_views_delete_button_only_deletes_the_post_of_the_author_not_other_users(self):
+        self.client.login(email='user1@gmail.com', password='1234')
+        response = self.client.get(reverse('posts:edit_post', args=[self.post_obj2.id]), follow=True)
+        self.assertContains(response, "You can't edit someone else's post dummy!", html=True)
+    
 
 
 

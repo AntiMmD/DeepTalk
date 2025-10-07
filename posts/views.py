@@ -6,6 +6,7 @@ from django.urls import reverse, reverse_lazy
 from django.contrib.auth import get_user_model, login, authenticate
 from .forms import SignUpForm
 from django.core.paginator import Paginator
+from django.contrib import messages
 User = get_user_model()
 
 def home(request):
@@ -41,19 +42,7 @@ def log_in(request):
 
     return render(request, 'posts/login.html')
 
-def post_form(request):
-    if request.user.is_authenticated:
-        if request.method == 'POST':
-            post_user = request.user
-            post_header = request.POST['header_input']
-            post_body = request.POST['body_input']
-            post_obj = Post.objects.create(user= post_user, header= post_header, body= post_body)
-            return redirect(reverse('posts:post_view', args=[post_obj.id]))
-        
-        return render(request, 'posts/postForm.html')
-    
-    else:
-        return redirect(reverse('sign_up'))
+
 
 def post_view(request, id):
     post_obj= Post.objects.get(id=id)
@@ -69,6 +58,39 @@ def delete_post(request, id):
                       context={'post': post_obj,
                                'error':"You can't delete someone else's post dummy!"})
 
+def edit_post(request, id):
+    post_obj= Post.objects.select_related('user').get(id=id)
+
+    if request.method == 'GET':
+        if post_obj.user == request.user:
+            return render(request, 'posts/postForm.html', context={'post': post_obj})
+    
+        messages.error(request, "You can't edit someone else's post dummy!")
+        return redirect('posts:post_view', post_obj.id)
+    
+    if request.method == 'POST':
+        if post_obj.user == request.user:
+            post_header = request.POST['header_input']
+            post_body = request.POST['body_input']
+            post_obj.header= post_header
+            post_obj.body= post_body
+            post_obj.save()
+            return redirect(reverse('posts:post_view', args=[post_obj.id]))
+        
+
+def post_form(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            post_user = request.user
+            post_header = request.POST['header_input']
+            post_body = request.POST['body_input']
+            post_obj = Post.objects.create(user= post_user, header= post_header, body= post_body)
+            return redirect(reverse('posts:post_view', args=[post_obj.id]))
+    
+        return render(request, 'posts/postForm.html')
+    
+    else:
+        return redirect(reverse('sign_up'))
 
 def post_manager(request):
     if request.user.is_authenticated:

@@ -1,6 +1,10 @@
 {% extends "posts/_base.html" %}
     {% block body %}
-        <p id="email_error" role="alert">{{ error }}</p>
+        {% if messages %}
+            {% for message in messages %}
+                <p id="error" role="alert">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
         <h2>
             <p id="posted_header">{{post.header}}</p>
         </h2>
@@ -12,5 +16,8 @@
                 <button id="delete_post" type="submit">Delete</button>
         </form>
 
-        <button id="edit_post" type="submit">Edit</button>
+        <form action="{% url 'posts:edit_post' post.id %}" method="get">
+            <button id="edit_post" type="submit">Edit</button>
+        </form>
+
     {% endblock %}

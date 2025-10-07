@@ -4,10 +4,10 @@
             {% csrf_token %}
             
             <p>
-                <input name="header_input" placeholder="Enter the heading" type="text">
+                <input name="header_input" id="header_input" value="{{post.header}}" placeholder="Enter the heading" type="text">
             </p>
             <p>
-                <textarea name="body_input" id="body_input" placeholder="Enter the body" rows="10" cols="80"></textarea>
+                <textarea name="body_input" id="body_input" placeholder="Enter the body" rows="10" cols="80">{{post.body}}</textarea>
             </p>
             
             <button id="submit" type="submit" >Submit</button>
