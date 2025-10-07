@@ -157,6 +157,39 @@ class NewVisitorTest(StaticLiveServerTestCase):
         for post in posts:
             self.assertNotEqual('Why puppies are the best!', post.text)
 
+        # he then decides to add some more text to his first post in order to explain the hazards of the extreame 
+        # wheather more thoroughly; he navigates to the post page and clicks edit button:
+
+        post_link= posts[0].find_element(By.TAG_NAME, 'a')
+        post_link.click()
+
+        edit_button= self.browser.find_element(By.ID, 'edit_post')
+        edit_button.click()
+
+        # he can see the exact form he used to write this post but this time the inputs are pre-filled with 
+        # what he wrote before
+
+        body = self.browser.find_element(By.NAME, 'body_input')
+        body.send_keys('During hot weather, ensure they have access to shade and fresh water at all times.')
+
+        self.browser.find_element(By.ID, 'submit').click()
+        time.sleep(5)
+        posted_header= self.browser.find_element(By.ID, 'posted_header').text
+        posted_body = self.browser.find_element(By.ID, 'posted_body').text
+
+        self.assertEqual(posted_header, "extreme climate and its effects on puppies")
+        self.assertIn(
+            (
+                "Extreme climate, whether scorching heat or freezing cold, can severely affect puppies."
+                "High temperatures can cause dehydration and heatstroke, while extreme cold can lead to hypothermia "
+                "and frostbite. Puppies are especially vulnerable because their bodies cannot regulate temperature well. "
+                "Proper shelter, hydration, and care are essential to keep them safe in harsh weather."
+                "During hot weather, ensure they have access to shade and fresh water at all times."
+            ),
+            posted_body
+        )
+
+
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
 
     def test_multiple_users_can_use_the_site_without_interfering_each_other(self):
