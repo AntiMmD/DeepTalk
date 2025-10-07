@@ -1,17 +1,18 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Post
-from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.contrib.auth import get_user_model, login, authenticate
 from .forms import SignUpForm
 from django.core.paginator import Paginator
 from django.contrib import messages
+from Blog.settings import PAGINATE_BY
+from django.contrib.auth.decorators import login_required
 User = get_user_model()
 
 def home(request):
-    all_the_posts_in_the_world = Post.objects.select_related('user').all()
-    paginator = Paginator(all_the_posts_in_the_world, 5)
+    posts = Post.objects.select_related('user').all()
+    paginator = Paginator(posts, PAGINATE_BY)
     page_number = request.GET.get("page")
     posts = paginator.get_page(page_number)
     return render(request, 'posts/home.html', context={'posts':posts})
@@ -42,10 +43,8 @@ def log_in(request):
 
     return render(request, 'posts/login.html')
 
-
-
 def post_view(request, id):
-    post_obj= Post.objects.get(id=id)
+    post_obj= get_object_or_404(Post, id=id)
     return render(request, 'posts/postView.html', context={'post': post_obj})
 
 def delete_post(request, id):
@@ -77,24 +76,19 @@ def edit_post(request, id):
             post_obj.save()
             return redirect(reverse('posts:post_view', args=[post_obj.id]))
         
-
+@login_required(login_url='sign_up')
 def post_form(request):
-    if request.user.is_authenticated:
-        if request.method == 'POST':
-            post_user = request.user
-            post_header = request.POST['header_input']
-            post_body = request.POST['body_input']
-            post_obj = Post.objects.create(user= post_user, header= post_header, body= post_body)
-            return redirect(reverse('posts:post_view', args=[post_obj.id]))
-    
-        return render(request, 'posts/postForm.html')
-    
-    else:
-        return redirect(reverse('sign_up'))
+    if request.method == 'POST':
+        post_user = request.user
+        post_header = request.POST['header_input']
+        post_body = request.POST['body_input']
+        post_obj = Post.objects.create(user= post_user, header= post_header, body= post_body)
+        return redirect(reverse('posts:post_view', args=[post_obj.id]))
 
+    return render(request, 'posts/postForm.html')
+
+@login_required(login_url='login')
 def post_manager(request):
-    if request.user.is_authenticated:
-            posts = Post.objects.filter(user= request.user)
-            return render(request, 'posts/postManager.html', context={'posts':posts})
-    
-    return(redirect('login'))
+        posts = Post.objects.filter(user= request.user)
+        return render(request, 'posts/postManager.html', context={'posts':posts})
+

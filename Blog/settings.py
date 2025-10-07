@@ -127,6 +127,7 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "posts.User"
+PAGINATE_BY = 5
 
 import sys
 TESTING = "test" in sys.argv

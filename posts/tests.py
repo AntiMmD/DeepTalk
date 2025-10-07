@@ -199,7 +199,8 @@ class CreatePostTest(UserAndPostFactory):
 
     def test_create_post_button_redirects_logged_out_user_to_signup(self):
         response = self.client.get(reverse('posts:post_form'))
-        self.assertRedirects(response, reverse('sign_up'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse('sign_up')))
 
     def test_create_post_button_renders_a_form_template_correctly_for_a_logged_in_user(self):
 
@@ -246,8 +247,9 @@ class PostManagerTest(UserAndPostFactory):
 
     def test_post_manager_redirects_to_login_page_if_user_is_loged_out(self):
         response= self.client.get(reverse('posts:post_manager'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse('login')))
 
-        self.assertRedirects(response, reverse('login'))
 
     def test_post_manager_only_displays_the_logged_in_users_posts(self):
         self.client.force_login(self.user2)
