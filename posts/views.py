@@ -48,7 +48,7 @@ def post_view(request, id):
     return render(request, 'posts/postView.html', context={'post': post_obj})
 
 def delete_post(request, id):
-    post_obj=  Post.objects.select_related('user').get(id= id)
+    post_obj = get_object_or_404(Post, id=id)
     if request.user == post_obj.user:
         post_obj.delete()
         return redirect(reverse('posts:post_manager'))
@@ -58,7 +58,7 @@ def delete_post(request, id):
                                'error':"You can't delete someone else's post dummy!"})
 
 def edit_post(request, id):
-    post_obj= Post.objects.select_related('user').get(id=id)
+    post_obj = get_object_or_404(Post, id=id)
 
     if request.method == 'GET':
         if post_obj.user == request.user:
