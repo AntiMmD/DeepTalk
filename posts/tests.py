@@ -41,9 +41,9 @@ class AuthenticationTest(TestCase):
         response = self.client.get(reverse('sign_up'))
         self.assertTemplateUsed(response, 'posts/signUp.html')
         self.assertContains(response, '<form method="POST"')
-        self.assertContains(response, 'name="email_input"')
-        self.assertContains(response, 'name="username_input"')
-        self.assertContains(response, 'name="password_input"')
+        self.assertContains(response, 'name="email"')
+        self.assertContains(response, 'name="username"')
+        self.assertContains(response, 'name="password"')
 
     def test_can_submit_the_sign_up_form_and_is_redirected_to_home_being_authenticated(self):
         with self.settings(CAPTCHA_TEST_MODE=True):
@@ -60,8 +60,8 @@ class AuthenticationTest(TestCase):
     def test_login_url_has_the_correct_contents(self):
         response= self.client.get(reverse('login'))
         self.assertContains(response, '<form id="login"')
-        self.assertContains(response, 'name="email_input"')
-        self.assertContains(response, 'name="password_input"')
+        self.assertContains(response, 'name="email"')
+        self.assertContains(response, 'name="password"')
     
     def test__user_can_not_authenticate_with_incorrect_password(self):
         User.objects.create_user(email='test@gmail.com', username= 'test', password='test1234')

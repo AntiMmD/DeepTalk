@@ -5,9 +5,9 @@ from django.db.models import Q
 from captcha.fields import CaptchaField
 
 class SignUpForm(forms.ModelForm):
-    email  = forms.EmailField(widget=forms.EmailInput(attrs={'id': 'email_input','name': 'email_input'}))
-    username = forms.CharField(widget=forms.TextInput(attrs={'id':'username_input','name': 'username_input'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'id':'password_input','name': 'password_input'}))
+    email  = forms.EmailField(widget=forms.EmailInput(attrs={'id': 'email_input'}))
+    username = forms.CharField(widget=forms.TextInput(attrs={'id':'username_input'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'id':'password_input'}))
     captcha = CaptchaField()
 
     class Meta:
@@ -30,8 +30,8 @@ class SignUpForm(forms.ModelForm):
         return cleaned_data
     
 class LoginForm(forms.Form):
-    email  = forms.EmailField(widget=forms.EmailInput(attrs={'id': 'email_input','name': 'email_input'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'id':'password_input','name': 'password_input'}))
+    email  = forms.EmailField(widget=forms.EmailInput(attrs={'id': 'email_input'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'id':'password_input'}))
     # captcha = CaptchaField()
     def clean(self):
         
@@ -42,3 +42,4 @@ class LoginForm(forms.Form):
         cleaned_data['user'] = user
         if user is None:
             raise forms.ValidationError("Invalid email or password!")
+        return cleaned_data

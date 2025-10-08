@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Post
 from django.urls import reverse
-from django.contrib.auth import get_user_model, login, authenticate
+from django.contrib.auth import get_user_model, login
 from .forms import SignUpForm, LoginForm
 from django.core.paginator import Paginator
 from django.contrib import messages
