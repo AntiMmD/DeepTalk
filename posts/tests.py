@@ -2,8 +2,8 @@ from django.test import TestCase
 from posts.models import Post,User
 from django.urls import reverse
 
-header = 'header test'
-body = 'body test'    
+header = 'header test1'
+body = 'body test1'    
 def create_post(user, header=header, body= body, amount=1):
     if amount ==1:
         post_obj = Post.objects.create(user=user, header=header, body=body)
@@ -14,28 +14,29 @@ def create_post(user, header=header, body= body, amount=1):
     return post_objects
 
 
-
-class UserAndPostFactory(TestCase):
+class UserAndPostFactoryMixin():
     def setUp(self):
         self.user1= User.objects.create_user(email= 'user1@gmail.com', username='user1',password='1234')
         self.user2= User.objects.create_user(email= 'user2@gmail.com',username='user2',password='1234')
 
         self.post_obj1= create_post(user=self.user1)
-        self.post_obj2 = create_post(user=self.user2, header='test2', body='test2')
+        self.post_obj2 = create_post(user=self.user2, header='header test2', body='body test2')
 
 
-
-class AuthenticationTest(TestCase):
-
+class SignUpMixin:
     def sign_up(self, email='test@gmail.com', username='test', password= 'test',captcha_1= 'passed'):
-        with self.settings(CAPTCHA_TEST_MODE=True):
-            response = self.client.post(reverse('sign_up'),
-                                        data={'email': email,
-                                            'username':username,
-                                            'password':password,
-                                            'captcha_0': 'dummy',
-                                            'captcha_1':captcha_1})
-            return response
+            with self.settings(CAPTCHA_TEST_MODE=True):
+                response = self.client.post(reverse('sign_up'),
+                                            data={'email': email,
+                                                'username':username,
+                                                'password':password,
+                                                'captcha_0': 'dummy',
+                                                'captcha_1':captcha_1})
+                return response
+            
+
+
+class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
 
     def test_sign_up_page_uses_correct_contents(self):
         response = self.client.get(reverse('sign_up'))
@@ -49,7 +50,7 @@ class AuthenticationTest(TestCase):
         with self.settings(CAPTCHA_TEST_MODE=True):
             response = self.sign_up()
         
-        self.assertEqual(User.objects.all().count(), 1, msg="User object was not created.")
+        self.assertEqual(User.objects.all().count(), 3, msg="User object was not created.") #3 because 2 users are created in the factory
         self.assertTrue(response.wsgi_request.user.is_authenticated)
         self.assertRedirects(response, reverse('home'))
 
@@ -64,28 +65,23 @@ class AuthenticationTest(TestCase):
         self.assertContains(response, 'name="password"')
     
     def test__user_can_not_authenticate_with_incorrect_password(self):
-        User.objects.create_user(email='test@gmail.com', username= 'test', password='test1234')
         
         response= self.client.post(reverse('login'),
-                        data={'email_input': 'test@gmail.com','password_input': 'wrongpass' })
+                        data={'email_input': 'user1@gmail.com','password_input': 'wrongpass' })
 
         self.assertFalse(response.wsgi_request.user.is_authenticated,
                          msg='user is loged in with an incorrect password!')
                 
     def test_valid_user_is_redirected_to_home_after_login_in(self):
-        User.objects.create_user(email='test@gmail.com', username= 'test', password='test1234')
-        user = User.objects.get(email='test@gmail.com')
-
         response= self.client.post(reverse('login'),
-                        data={'email': 'test@gmail.com','password': 'test1234' })
+                        data={'email': 'user1@gmail.com','password': '1234' })
         self.assertTrue(response.wsgi_request.user.is_authenticated)
-        self.assertEqual(response.wsgi_request.user.email, 'test@gmail.com')
-        self.assertTrue(user.check_password('test1234'))
+        self.assertEqual(response.wsgi_request.user.email, 'user1@gmail.com')
+        self.assertTrue(self.user1.check_password('1234'))
         self.assertRedirects(response, reverse('home'))
 
     def test_logout_redirects_to_login_page_and_logs_out_user(self):
-        user= User.objects.create_user(email='test@gmail.com', username= 'test', password='test1234')
-        self.client.login(email= user.email, password='test1234')
+        self.client.login(email= self.user1.email, password='1234')
         response= self.client.get(reverse('logout'))
         
         self.assertFalse(response.wsgi_request.user.is_authenticated)
@@ -93,7 +89,7 @@ class AuthenticationTest(TestCase):
 
 
 
-class ErrorHandlingTest(AuthenticationTest):
+class ErrorHandlingTest(SignUpMixin, TestCase):
 
     def test_sign_up_view_displays_captcha_error_when_the_captcha_is_filled_incorrectly(self):
             response = self.sign_up(captcha_1='NOTpassed')                
@@ -126,7 +122,7 @@ class ErrorHandlingTest(AuthenticationTest):
 
 
 
-class HomePageTest(AuthenticationTest):
+class HomePageTest(UserAndPostFactoryMixin, TestCase):
     
     def test_home_page_uses_home_template(self):
         response = self.client.get(reverse('home'))
@@ -143,32 +139,23 @@ class HomePageTest(AuthenticationTest):
         self.assertContains(response, f'<a href="{reverse("posts:post_manager")}"')
 
     def test_home_page_feed_displays_users_posts(self):
-        user1 = User.objects.create_user(username='Farshad', email='Farshad@gmail.com')
-        user2 = User.objects.create_user(username='Sara', email='Sara@gmail.com')
-
-        create_post(user= user1, header= 'Puppies are the best')
-        create_post(user= user2, header= 'Kitties are the best')
 
         response= self.client.get(reverse('home'))
-        self.assertContains(response, 'class="feed_post"')
-        self.assertContains(response, 'Puppies are the best')
-        self.assertContains(response, 'Kitties are the best')
+        self.assertContains(response, 'class="feed_posts"')
+        self.assertContains(response, 'header test2') 
+        self.assertContains(response, 'header test1')
     
     def test_home_page_feed_posts_are_ordered_from_newer_to_older(self):
-        user1 = User.objects.create_user(username='Farshad', email='Farshad@gmail.com')
-        user2 = User.objects.create_user(username='Sara', email='Sara@gmail.com')
 
-        create_post(user= user1, header= 'Old Post')
-        create_post(user= user2, header= 'New Post')
         response= self.client.get(reverse('home'))
 
         posts_in_context = response.context['posts']
-        self.assertEqual(posts_in_context[0].header, 'New Post')
-        self.assertEqual(posts_in_context[1].header, 'Old Post')
+        self.assertEqual(posts_in_context[0].header, 'header test2') #newer post
+        self.assertEqual(posts_in_context[1].header, 'header test1')
 
 
 
-class PaginationTest(UserAndPostFactory):
+class PaginationTest(UserAndPostFactoryMixin, TestCase):
     """Test pagination behavior without hardcoding page size"""
     
     def setUp(self):
@@ -202,14 +189,14 @@ class PaginationTest(UserAndPostFactory):
 
 
 
-class CreatePostTest(UserAndPostFactory):
+class CreatePostTest(UserAndPostFactoryMixin, TestCase):
 
-    def test_create_post_button_redirects_logged_out_user_to_signup(self):
+    def test_create_post_button_redirects_loged_out_user_to_signup(self):
         response = self.client.get(reverse('posts:post_form'))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(reverse('sign_up')))
 
-    def test_create_post_button_renders_a_form_template_correctly_for_a_logged_in_user(self):
+    def test_create_post_button_renders_a_form_template_correctly_for_a_loged_in_user(self):
 
         self.client.force_login(self.user1)
         response = self.client.get(reverse('posts:post_form'))
@@ -233,7 +220,7 @@ class CreatePostTest(UserAndPostFactory):
         
 
 
-class PostManagerTest(UserAndPostFactory): 
+class PostManagerTest(UserAndPostFactoryMixin, TestCase): 
     def test_post_manager_uses_the_correct_template(self):
         self.client.force_login(self.user1)
         response= self.client.get(reverse('posts:post_manager'))
@@ -258,7 +245,7 @@ class PostManagerTest(UserAndPostFactory):
         self.assertTrue(response.url.startswith(reverse('login')))
 
 
-    def test_post_manager_only_displays_the_logged_in_users_posts(self):
+    def test_post_manager_only_displays_the_loged_in_users_posts(self):
         self.client.force_login(self.user2)
         response= self.client.get(reverse('posts:post_manager'))
 
@@ -267,7 +254,7 @@ class PostManagerTest(UserAndPostFactory):
 
 
 
-class PostViewTest(UserAndPostFactory):
+class PostViewTest(UserAndPostFactoryMixin, TestCase):
     def test_post_view_displays_correct_post(self):
         response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
 
@@ -338,7 +325,7 @@ class PostViewTest(UserAndPostFactory):
         self.assertEqual(self.post_obj1.body, new_body)
         self.assertRedirects(response, reverse('posts:post_view', args=[self.post_obj1.id]))
 
-    def test_post_views_delete_button_only_deletes_the_post_of_the_author_not_other_users(self):
+    def test_post_views_edit_button_only_edits_the_post_of_the_author_not_other_users(self):
         self.client.login(email='user1@gmail.com', password='1234')
         response = self.client.get(reverse('posts:edit_post', args=[self.post_obj2.id]), follow=True)
         self.assertContains(response, "You can't edit someone else's post dummy!", html=True)
@@ -346,8 +333,7 @@ class PostViewTest(UserAndPostFactory):
     
 
 
-
-class UserAndPostModelsTest(UserAndPostFactory):
+class UserAndPostModelsTest(UserAndPostFactoryMixin, TestCase):
     def test_each_post_is_associated_with_a_user(self):
         saved_post_obj1= Post.objects.get(user= self.user1 )
         saved_post_obj2= Post.objects.get(user= self.user2 )
