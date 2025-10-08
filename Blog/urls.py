@@ -9,6 +9,7 @@ urlpatterns = [
     path('', posts_view.home, name='home'),
     path('sign_up', posts_view.sign_up, name= 'sign_up'),
     path("login", posts_view.log_in, name='login'),
+    path("logout", posts_view.log_out, name='logout'),
     path('posts/', include('posts.urls', namespace='posts')),
     path('captcha/', include('captcha.urls')),
  ]

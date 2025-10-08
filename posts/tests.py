@@ -63,7 +63,6 @@ class AuthenticationTest(TestCase):
         self.assertContains(response, 'name="email_input"')
         self.assertContains(response, 'name="password_input"')
     
-
     def test__user_can_not_authenticate_with_incorrect_password(self):
         User.objects.create_user(email='test@gmail.com', username= 'test', password='test1234')
         
@@ -83,6 +82,14 @@ class AuthenticationTest(TestCase):
         self.assertEqual(response.wsgi_request.user.email, 'test@gmail.com')
         self.assertTrue(user.check_password('test1234'))
         self.assertRedirects(response, reverse('home'))
+
+    def test_logout_redirects_to_login_page_and_logs_out_user(self):
+        user= User.objects.create_user(email='test@gmail.com', username= 'test', password='test1234')
+        self.client.login(email= user.email, password='test1234')
+        response= self.client.get(reverse('logout'))
+        
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertRedirects(response, reverse('login'))
 
 
 

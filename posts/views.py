@@ -43,6 +43,11 @@ def log_in(request):
 
     return render(request, 'posts/login.html')
 
+def log_out(request):
+    from django.contrib.auth import logout
+    logout(request)
+    return redirect('login')
+
 def post_view(request, id):
     post_obj= get_object_or_404(Post, id=id)
     return render(request, 'posts/postView.html', context={'post': post_obj})
