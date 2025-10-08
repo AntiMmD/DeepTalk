@@ -1,5 +1,6 @@
 {% extends "posts/_base.html" %}
     {% block body %}
+        <p>{{error}}</p>
         {% if messages %}
             {% for message in messages %}
                 <p id="error" role="alert">{{ message }}</p>
