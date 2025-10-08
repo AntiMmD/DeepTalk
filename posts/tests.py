@@ -77,7 +77,7 @@ class AuthenticationTest(TestCase):
         user = User.objects.get(email='test@gmail.com')
 
         response= self.client.post(reverse('login'),
-                        data={'email_input': 'test@gmail.com','password_input': 'test1234' })
+                        data={'email': 'test@gmail.com','password': 'test1234' })
         self.assertTrue(response.wsgi_request.user.is_authenticated)
         self.assertEqual(response.wsgi_request.user.email, 'test@gmail.com')
         self.assertTrue(user.check_password('test1234'))

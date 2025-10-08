@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from .models import Post
 from django.urls import reverse
 from django.contrib.auth import get_user_model, login, authenticate
-from .forms import SignUpForm
+from .forms import SignUpForm, LoginForm
 from django.core.paginator import Paginator
 from django.contrib import messages
 from Blog.settings import PAGINATE_BY
@@ -33,15 +33,14 @@ def sign_up(request):
 
 def log_in(request):
     if request.method == 'POST':
-        email=request.POST['email_input']
-        password= request.POST['password_input']
- 
-        user = authenticate(request, username=email, password=password)
-        if user is not None:
-            login(request, user)
+        form= LoginForm(request.POST)
+        if form.is_valid():
+            login(request, form.cleaned_data['user'])
             return redirect(reverse('home'))
+        else: 
+            return render(request, 'posts/login.html', context={'form': form})
 
-    return render(request, 'posts/login.html')
+    return render(request, 'posts/login.html', context={'form': LoginForm()})
 
 def log_out(request):
     from django.contrib.auth import logout
