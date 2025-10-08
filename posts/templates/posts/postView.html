@@ -9,7 +9,10 @@
             <p id="posted_header">{{post.header}}</p>
         </h2>
         
-        <p id="posted_body">{{post.body}}</p>
+        <div id="posted_body">{{ post.body|linebreaks }}</div>
+
+        <p id="author">Posted by: {{ post.user.username }}</p>
+        <p id="posted_date">Posted on: {{ post.created_at }}</p>
 
         <form action="{% url 'posts:delete_post' post.id %}" method="post">
             {% csrf_token %}

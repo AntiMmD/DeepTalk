@@ -268,8 +268,18 @@ class PostViewTest(UserAndPostFactory):
         self.assertEqual(response.context['post'].header, header)
         self.assertEqual(response.context['post'].body, body )
         self.assertContains(response, '<p id="posted_header"')
-        self.assertContains(response, '<p id="posted_body"')
+        self.assertContains(response, '<div id="posted_body"')
     
+    def test_post_view_displays_Post_author_and_date(self):
+        response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
+
+        self.assertContains(response, f'<p id="author">Posted by: {self.user1.username}</p>', html=True) 
+
+        # Test date display - just verify structure exists, not exact format
+        self.assertContains(response, '<p id="posted_date">Posted on:')
+        self.assertContains(response, 'Oct.') 
+        self.assertContains(response, '2025')
+
     def test_post_view_allows_navigation_back_home(self):
         response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
 
@@ -303,7 +313,6 @@ class PostViewTest(UserAndPostFactory):
         self.assertIn('header test', response.content.decode())
         self.assertIn('body test', response.content.decode())
     
-
     def test_edit_post_updates_post(self):
         self.client.login(email='user1@gmail.com', password='1234')
         new_header = "Updated Header"
@@ -326,6 +335,7 @@ class PostViewTest(UserAndPostFactory):
         self.client.login(email='user1@gmail.com', password='1234')
         response = self.client.get(reverse('posts:edit_post', args=[self.post_obj2.id]), follow=True)
         self.assertContains(response, "You can't edit someone else's post dummy!", html=True)
+
     
 
 
