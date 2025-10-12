@@ -1,3 +1,4 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
@@ -15,6 +16,8 @@ User = get_user_model()
 class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
+        if test_server := os.environ.get("TEST_SERVER"):   
+            self.live_server_url = "http://" + test_server
 
     def tearDown(self):
         self.browser.quit()
