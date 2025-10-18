@@ -5,7 +5,7 @@ ENV PATH="/venv/bin:$PATH"
 
 RUN pip install --upgrade pip && \
     pip install "django<6" "django-simple-captcha" "django-debug-toolbar" && \
-    pip install "django<6" gunicorn  
+    pip install "django<6" gunicorn whitenoise 
 
 
 COPY src /src
