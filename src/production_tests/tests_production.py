@@ -13,7 +13,6 @@ class StaticFilesSmokeTest(StaticLiveServerTestCase):
         self.browser.quit()
 
     def test_static_files_are_served_correctly(self):
-        """Verify static files are served by checking CSS-dependent layout"""
         # Farshid goes to the home page
         self.browser.get(self.live_server_url)
         
