@@ -1,0 +1,17 @@
+- hosts: all
+  tasks:
+    - name: Install docker
+      ansible.builtin.apt:
+        name: docker.io
+        state: latest
+        update_cache: true
+      become: true
+
+    - name: Run rootless test container
+      community.docker.docker_container:
+        name: rootless-test
+        image: busybox
+        command: echo hello from rootless
+        auto_remove: true
+        state: started
+        docker_host: "unix://{{ ansible_env.XDG_RUNTIME_DIR }}/docker.sock"
