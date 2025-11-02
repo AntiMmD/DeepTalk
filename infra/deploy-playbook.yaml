@@ -7,6 +7,7 @@
         update_cache: true
       become: true
 
+    # set up rootless docker on server before running this, I forgot to use ansible for it and did it manually
     - name: Run rootless test container
       community.docker.docker_container:
         name: rootless-test
@@ -14,4 +15,50 @@
         command: echo hello from rootless
         auto_remove: true
         state: started
+        docker_host: "unix://{{ ansible_env.XDG_RUNTIME_DIR }}/docker.sock"
+
+   ## this ansible command doesn't work for some reasons! no idea why 
+    # - name: Build container image locally
+    #   community.docker.docker_image:
+    #     name: blog
+    #     source: build
+    #     state: present
+    #     build:
+    #       path: "{{ playbook_dir }}/.."
+    #       dockerfile: "Dockerfile"
+    #     force_source: true  
+    #   delegate_to: localhost
+    #   vars:
+    #     ansible_connection: local
+    #   run_once: true
+
+    - name: Export container image locally
+      community.docker.docker_image:
+        name: blog
+        archive_path: /tmp/blog-img.tar
+        source: local
+      delegate_to: localhost
+      vars: { ansible_connection: local }
+      run_once: true
+
+    - name: Upload image to server
+      ansible.builtin.copy:
+        src: /tmp/blog-img.tar
+        dest: /tmp/blog-img.tar
+
+    - name: Import container image on server
+      community.docker.docker_image:
+        name: blog
+        load_path: /tmp/blog-img.tar
+        source: load
+        force_source: true
+        state: present
+        docker_host: "unix://{{ ansible_env.XDG_RUNTIME_DIR }}/docker.sock"
+
+    - name: Run container
+      community.docker.docker_container:
+        name: blog
+        image: blog
+        state: started
+        recreate: true
         docker_host: "unix://{{ ansible_env.XDG_RUNTIME_DIR }}/docker.sock"
