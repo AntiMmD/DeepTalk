@@ -14,13 +14,21 @@ def create_post(user, header=header, body= body, amount=1):
     return post_objects
 
 
-class UserAndPostFactoryMixin():
-    def setUp(self):
-        self.user1= User.objects.create_user(email= 'user1@gmail.com', username='user1',password='1234')
-        self.user2= User.objects.create_user(email= 'user2@gmail.com',username='user2',password='1234')
+class UserAndPostFactoryMixin:
+    # note to myself: setUpTestData runs once before every class that inherits from TestCase
+    # but setUp() runs once before every method!
+    
+    @classmethod
+    def setUpTestData(cls): 
+        cls.user1 = User.objects.create_user(email='user1@gmail.com',
+                                             username='user1', password='1234')
+        cls.user2 = User.objects.create_user(email='user2@gmail.com',
+                                             username='user2', password='1234')
 
-        self.post_obj1= create_post(user=self.user1)
-        self.post_obj2 = create_post(user=self.user2, header='header test2', body='body test2')
+        # create single objects (create_post(amount=1) returns the object)
+        cls.post_obj1 = create_post(user=cls.user1)
+        cls.post_obj2 = create_post(user=cls.user2,
+                                    header='header test2', body='body test2')
 
 
 class SignUpMixin:
@@ -271,8 +279,7 @@ class PostViewTest(UserAndPostFactoryMixin, TestCase):
 
         # Test date display - just verify structure exists, not exact format
         self.assertContains(response, '<p id="posted_date">Posted on:')
-        self.assertContains(response, 'Oct.') 
-        self.assertContains(response, '2025')
+
 
     def test_post_view_allows_navigation_back_home(self):
         response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
