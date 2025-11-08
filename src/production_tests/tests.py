@@ -6,8 +6,9 @@ from selenium.webdriver.common.by import By
 class StaticFilesSmokeTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
-        if test_server := os.environ.get("TEST_SERVER", "localhost:8888"):   
-            self.live_server_url = "http://" + test_server
+        production_server = os.environ.get("PRODUCTION_SERVER")
+        if production_server:
+            self.live_server_url = f"http://{production_server}"
 
     def tearDown(self):
         self.browser.quit()
