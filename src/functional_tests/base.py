@@ -8,7 +8,7 @@ User = get_user_model()
 
     # Farshad has recently heard about a cool website where he can write a blog post and share it with others
 
-class FuntionalTest(StaticLiveServerTestCase):
+class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
         if test_server := os.environ.get("TEST_SERVER"):   

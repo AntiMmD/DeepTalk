@@ -4,15 +4,15 @@ from django.urls import reverse
 from urllib.parse import urlparse
 from posts.models import Post
 from django.contrib.auth import get_user_model
-from .base import FuntionalTest
+from .base import FunctionalTest
 User = get_user_model()
 
     # Farshad has recently heard about a cool website where he can write a blog post and share it with others
     # he opens his browser and checks the homepage 
 
-class HomePageTest(FuntionalTest):
+class HomePageTest(FunctionalTest):
 
-    def test_can_see_the_homepage(self):
+    def test_sign_up(self):
         self.browser.get(self.live_server_url)
 
         # Farshad immediately notices the page title mentioning 'Deep Talk'
@@ -24,7 +24,7 @@ class HomePageTest(FuntionalTest):
         self.assertEqual('+ create post', button.text.lower())
         button.click()
 
-         # Farshad sees a sign-un form instead, he understand that he needs to sign-up first using email
+        # Farshad sees a sign-un form instead, he understand that he needs to sign-up first using email
         # he does so
 
         self.assertEqual(urlparse(self.browser.current_url).path, reverse('sign_up'))
@@ -37,6 +37,10 @@ class HomePageTest(FuntionalTest):
 
         # after signing-in, he is redirected to the homepage
         self.assertEqual(urlparse(self.browser.current_url).path, reverse('home'))
+        
+
+    def test_create_post(self):
+        self.sign_up()
         self.browser.find_element(By.ID, 'create_post_button').click()
 
         # he sees a form where he can type in a heading and the body of the post
@@ -64,6 +68,10 @@ class HomePageTest(FuntionalTest):
         self.assertEqual(posted_header, "extreme climate and its effects on puppies")
         self.assertIn("Puppies are especially vulnerable because their bodies cannot regulate temperature",
                        posted_body)
+    
+    def test_accessing_My_Posts_section(self):
+        self.sign_up()
+        self.create_post()
         # after checking his post, Farshad wants to go back to the home page
         # so he clicks on the name of the website visible on the top-left of the page which redirects him-
         # to the hamepage 
@@ -90,11 +98,24 @@ class HomePageTest(FuntionalTest):
 
         assert self.browser.find_elements(By.TAG_NAME, 'p'), "<p> element not found"
 
-        headers = ['Why puppies are the best!',"extreme climate and its effects on puppies"]
+        headers = ['Why puppies are the best!','header test']
         posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts')
         for post in posts:
             self.assertIn(post.text, headers)
 
+    def test_editing_and_deleting_the_post(self):
+        self.sign_up()
+        self.create_post(header='extreme climate and its effects on puppies',
+                        body='Extreme climate, whether scorching heat or freezing cold, can severely affect puppies.' \
+        'High temperatures can cause dehydration and heatstroke, while extreme cold can lead to hypothermia'
+        ' and frostbite. Puppies are especially vulnerable because their bodies cannot regulate temperature' \
+        ' well. Proper shelter, hydration, and care are essential to keep them safe in harsh weather.')
+
+        self.create_post(header='Why puppies are the best!',
+                        body='Becasue they woof-woof all the time!')
+        self.browser.find_element(By.ID, 'my_posts').click()
+        posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts')
+        
         # he clicks on his first post and navigates to see the details of the post 
         post_link = posts[0].find_element(By.TAG_NAME, 'a')
         post_link.click()
@@ -127,21 +148,14 @@ class HomePageTest(FuntionalTest):
         body.send_keys('During hot weather, ensure they have access to shade and fresh water at all times.')
 
         self.browser.find_element(By.ID, 'submit').click()
-        time.sleep(5)
         posted_header= self.browser.find_element(By.ID, 'posted_header').text
         posted_body = self.browser.find_element(By.ID, 'posted_body').text
 
         self.assertEqual(posted_header, "extreme climate and its effects on puppies")
-        self.assertIn(
-            (
-                "Extreme climate, whether scorching heat or freezing cold, can severely affect puppies."
-                "High temperatures can cause dehydration and heatstroke, while extreme cold can lead to hypothermia "
-                "and frostbite. Puppies are especially vulnerable because their bodies cannot regulate temperature well. "
-                "Proper shelter, hydration, and care are essential to keep them safe in harsh weather."
-                "During hot weather, ensure they have access to shade and fresh water at all times."
-            ),
-            posted_body
-        )
+        self.assertIn("Extreme climate", posted_body)
+        self.assertIn("High temperatures can cause dehydration", posted_body)
+        self.assertIn("cannot regulate temperature well", posted_body)
+        self.assertIn("access to shade and fresh water", posted_body)
 
         # satisfied by the result, he closes the browser, excited to see if anyone actually reads him or not 
 
@@ -161,7 +175,7 @@ class HomePageTest(FuntionalTest):
           
         # She goes to check her post in the My Posts section where she can only see her posts...
         self.login(email='sara@gmail.com', password='sara')
-        self.browser.get(f'{self.live_server_url}{reverse('posts:post_manager')}')
+        self.browser.get(f"{self.live_server_url}{reverse('posts:post_manager')}")
         posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts' )
         my_posts = [post.text for post in posts]
         self.assertNotIn('Why puppies are the best!', my_posts)

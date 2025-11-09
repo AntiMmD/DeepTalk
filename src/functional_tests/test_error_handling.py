@@ -1,10 +1,10 @@
 from django.urls import reverse
 from urllib.parse import urlparse
 from django.contrib.auth import get_user_model
-from .base import FuntionalTest
+from .base import FunctionalTest
 User = get_user_model()
 
-class UsersDontSeeInternalErrorsTest(FuntionalTest):
+class UsersDontSeeInternalErrorsTest(FunctionalTest):
 
     # Farshid, Farshad's older brother heard about a cool site where he can create a post for others to read
     # and wants to try it himself, he tries signing up; but because of him being a clumpsy silly goose
