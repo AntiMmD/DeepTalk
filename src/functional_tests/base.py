@@ -9,13 +9,27 @@ User = get_user_model()
     # Farshad has recently heard about a cool website where he can write a blog post and share it with others
 
 class FunctionalTest(StaticLiveServerTestCase):
-    def setUp(self):
-        self.browser = webdriver.Firefox()
+
+    @classmethod
+    def setUpClass(cls):
+        # Start Django live server first
+        super().setUpClass()
+        cls.browser = webdriver.Firefox()
         if test_server := os.environ.get("TEST_SERVER"):   
-            self.live_server_url = "http://" + test_server
+            cls.live_server_url = "http://" + test_server
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            cls.browser.quit()
+        finally:
+            super().tearDownClass()
 
     def tearDown(self):
-        self.browser.quit()
+        try:
+            self.browser.delete_all_cookies()
+        except Exception:
+            pass
 
     def login(self,email= 'test@gmail.com', password='test1234'):
         
@@ -33,7 +47,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         ## remember to set CAPTCHA_TEST_MODE=True in the settings when testing
         ## REMOVE IT IN PRODUCTION
         with self.settings(CAPTCHA_TEST_MODE=True):
-            self.browser.get(f'{self.live_server_url}{reverse('sign_up')}')
+            self.browser.get(f"{self.live_server_url}{reverse('sign_up')}")
             email_input= self.browser.find_element(By.ID, "email_input")
             username_input= self.browser.find_element(By.ID, "username_input")
             password_input= self.browser.find_element(By.ID, "password_input")
@@ -47,7 +61,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def create_post(self, header='header test', body= 'body test'):
 
-        self.browser.get(f'{self.live_server_url}{reverse('posts:post_form')}')
+        self.browser.get(f"{self.live_server_url}{reverse('posts:post_form')}")
         self.browser.find_element(By.ID, 'post_form')
         header_input = self.browser.find_element(By.NAME, 'header_input')
         body_input = self.browser.find_element(By.NAME, 'body_input')
