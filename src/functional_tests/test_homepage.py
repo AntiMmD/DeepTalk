@@ -27,7 +27,8 @@ class HomePageTest(FunctionalTest):
         # Farshad sees a sign-un form instead, he understand that he needs to sign-up first using email
         # he does so
 
-        self.assertEqual(urlparse(self.browser.current_url).path, reverse('sign_up'))
+        self.wait_for(lambda:self.assertEqual(urlparse(self.browser.current_url).path,
+                            reverse('sign_up')))
 
         self.assertIn('email:', self.browser.page_source.lower())
         self.assertIn('username:', self.browser.page_source.lower())
@@ -36,16 +37,17 @@ class HomePageTest(FunctionalTest):
         self.sign_up()
 
         # after signing-in, he is redirected to the homepage
-        self.assertEqual(urlparse(self.browser.current_url).path, reverse('home'))
+        self.wait_for(lambda:self.assertEqual(urlparse(self.browser.current_url).path,
+                            reverse('home')))
         
 
     def test_create_post(self):
         self.sign_up()
-        self.browser.find_element(By.ID, 'create_post_button').click()
+        self.wait_for(lambda:self.browser.find_element(By.ID, 'create_post_button')).click()
 
         # he sees a form where he can type in a heading and the body of the post
 
-        self.browser.find_element(By.ID, 'post_form')
+        self.wait_for(lambda:self.browser.find_element(By.ID, 'post_form'))
         header = self.browser.find_element(By.NAME, 'header_input')
         body = self.browser.find_element(By.NAME, 'body_input')
 
@@ -62,7 +64,7 @@ class HomePageTest(FunctionalTest):
 
         # after creating the post, he clicks the submit button and it redirects him where he can see his post 
         self.browser.find_element(By.ID, 'submit').click()
-        posted_header= self.browser.find_element(By.ID, 'posted_header').text
+        posted_header= self.wait_for(lambda:self.browser.find_element(By.ID, 'posted_header').text)
         posted_body = self.browser.find_element(By.ID, 'posted_body').text
 
         self.assertEqual(posted_header, "extreme climate and its effects on puppies")
@@ -76,7 +78,7 @@ class HomePageTest(FunctionalTest):
         # so he clicks on the name of the website visible on the top-left of the page which redirects him-
         # to the hamepage 
 
-        self.browser.find_element(By.ID, 'home_redirect').click()
+        self.wait_for(lambda:self.browser.find_element(By.ID, 'home_redirect')).click()
         url = self.browser.current_url
         self.assertEqual(urlparse(url).path, reverse('home'))
 
@@ -84,19 +86,20 @@ class HomePageTest(FunctionalTest):
         self.create_post(header='Why puppies are the best!',
                         body='Becasue they woof-woof all the time!')
         
-        self.browser.find_element(By.ID, 'home_redirect').click()
+        self.wait_for(lambda:self.browser.find_element(By.ID, 'home_redirect')).click()
 
         # Farshad suddenly remembers that he hadn't checked if he has written all the
         # reasons for why the puppies are the best
         # so he uses the navigation feature at the right corner of the home page called 'My Posts'
         # after clicking on it, he can see a page displaying the headers of his 2 posts
 
-        my_posts_clickable= self.browser.find_element(By.ID, 'my_posts')
+        my_posts_clickable= self.wait_for(lambda:self.browser.find_element(By.ID, 'my_posts'))
         self.assertEqual(my_posts_clickable.text, 'My Posts')
 
         my_posts_clickable.click()
 
-        assert self.browser.find_elements(By.TAG_NAME, 'p'), "<p> element not found"
+        self.wait_for(lambda: self.assertTrue(self.browser.find_elements(By.TAG_NAME, 'p'),
+                            "<p> element not found"))
 
         headers = ['Why puppies are the best!','header test']
         posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts')
@@ -113,7 +116,7 @@ class HomePageTest(FunctionalTest):
 
         self.create_post(header='Why puppies are the best!',
                         body='Becasue they woof-woof all the time!')
-        self.browser.find_element(By.ID, 'my_posts').click()
+        self.wait_for(lambda:self.browser.find_element(By.ID, 'my_posts').click())
         posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts')
         
         # he clicks on his first post and navigates to see the details of the post 
@@ -121,12 +124,17 @@ class HomePageTest(FunctionalTest):
         post_link.click()
 
         # in the post page he can delete or edit the post using delete and edit buttons 
-        delete_button= self.browser.find_element(By.ID, 'delete_post')
+        delete_button=  self.wait_for(lambda:self.browser.find_element(By.ID, 'delete_post'))
         self.browser.find_element(By.ID, 'edit_post')
 
         # and he decised to delete the post
         delete_button.click()
-        self.assertEqual(urlparse(self.browser.current_url).path, reverse('posts:post_manager'))
+        self.wait_for(lambda: self.assertGreater(
+            len(self.browser.find_elements(By.CLASS_NAME, 'my_posts')),
+            0,
+            "User's posts did not appear on My Posts page"
+        ))
+
 
         posts = self.browser.find_elements(By.CLASS_NAME, 'my_posts')
         for post in posts:
@@ -138,17 +146,17 @@ class HomePageTest(FunctionalTest):
         post_link= posts[0].find_element(By.TAG_NAME, 'a')
         post_link.click()
 
-        edit_button= self.browser.find_element(By.ID, 'edit_post')
+        edit_button=  self.wait_for(lambda:self.browser.find_element(By.ID, 'edit_post'))
         edit_button.click()
 
         # he can see the exact form he used to write this post but this time the inputs are pre-filled with 
         # what he wrote before
 
-        body = self.browser.find_element(By.NAME, 'body_input')
+        body =  self.wait_for(lambda:self.browser.find_element(By.NAME, 'body_input'))
         body.send_keys('During hot weather, ensure they have access to shade and fresh water at all times.')
 
         self.browser.find_element(By.ID, 'submit').click()
-        posted_header= self.browser.find_element(By.ID, 'posted_header').text
+        posted_header=  self.wait_for(lambda:self.browser.find_element(By.ID, 'posted_header')).text
         posted_body = self.browser.find_element(By.ID, 'posted_body').text
 
         self.assertEqual(posted_header, "extreme climate and its effects on puppies")
@@ -165,7 +173,6 @@ class HomePageTest(FunctionalTest):
         self.sign_up(username='Farshad')
         self.create_post(header='Why puppies are the best!',
                           body='Becasue they woof-woof all the time!')
-        time.sleep(0.1) 
         
         # he's not really in the mood to write more than he already did, so he just gazes into the screen 
         #in the meantime a new user, Sara wants to try this awsome site!
@@ -191,7 +198,7 @@ class HomePageTest(FunctionalTest):
         # the posts are ordered based on the publish date and time. newer to older
         # Farshad can see the author username on the post
 
-        feed_post= self.browser.find_elements(By.CLASS_NAME, 'feed_post')
+        feed_post=  self.wait_for(lambda:self.browser.find_elements(By.CLASS_NAME, 'feed_post'))
 
         post_header = self.browser.find_elements(By.CLASS_NAME, 'post_header')
         post_author = self.browser.find_elements(By.CLASS_NAME, 'post_author')

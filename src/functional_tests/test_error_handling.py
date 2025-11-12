@@ -22,13 +22,16 @@ class UsersDontSeeInternalErrorsTest(FunctionalTest):
         ## Farshid tries to sign up
         self.sign_up(email='Farshad@gmail.com', username='Farshad', password='41148')
         #He sees an error message in the sign_up page saying a user with this email and username already exsits
-        self.assertIn('a user with this email already exists!',self.browser.page_source.lower())
+        self.wait_for(lambda: self.assertIn('a user with this email already exists!',
+                        self.browser.page_source.lower()))
         self.assertIn('this username is taken!', self.browser.page_source.lower())
 
         # he tries again; but this time he doesn't use the correct username
         self.sign_up(email='Farshid@gmail.com', username='Farshad', password='41148')
-        self.assertNotIn('a user with this email already exists!', self.browser.page_source.lower())
+        self.wait_for(lambda: self.assertNotIn('a user with this email already exists!',
+                            self.browser.page_source.lower()))
 
         # and again; this time with an incorrect email but a correct username
         self.sign_up(email='Farshad@gmail.com', username='Farshid', password='41148')
-        self.assertNotIn('this username is taken!', self.browser.page_source.lower())
+        self.wait_for(lambda:self.assertNotIn('this username is taken!',
+                    self.browser.page_source.lower()))

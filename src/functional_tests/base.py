@@ -1,5 +1,7 @@
 import os
+import time
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.urls import reverse
@@ -9,6 +11,8 @@ User = get_user_model()
     # Farshad has recently heard about a cool website where he can write a blog post and share it with others
 
 class FunctionalTest(StaticLiveServerTestCase):
+
+    MAX_WAIT= 5
 
     @classmethod
     def setUpClass(cls):
@@ -30,6 +34,17 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.browser.delete_all_cookies()
         except Exception:
             pass
+    
+    def wait_for(self, fn):
+        start_time= time.time()
+        while True:
+            try:
+                return fn()
+            
+            except (AssertionError, WebDriverException):
+                if (time.time() - start_time) > self.MAX_WAIT:
+                    raise
+                time.sleep(0.5)
 
     def login(self,email= 'test@gmail.com', password='test1234'):
         
@@ -44,20 +59,17 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def sign_up(self,email= 'test@gmail.com',username= 'test',password='test1234'):
 
-        ## remember to set CAPTCHA_TEST_MODE=True in the settings when testing
-        ## REMOVE IT IN PRODUCTION
-        with self.settings(CAPTCHA_TEST_MODE=True):
-            self.browser.get(f"{self.live_server_url}{reverse('sign_up')}")
-            email_input= self.browser.find_element(By.ID, "email_input")
-            username_input= self.browser.find_element(By.ID, "username_input")
-            password_input= self.browser.find_element(By.ID, "password_input")
-            
-            self.browser.find_element(By.NAME, "captcha_1").send_keys("passed")
+        self.browser.get(f"{self.live_server_url}{reverse('sign_up')}")
+        email_input= self.browser.find_element(By.ID, "email_input")
+        username_input= self.browser.find_element(By.ID, "username_input")
+        password_input= self.browser.find_element(By.ID, "password_input")
+        
+        self.browser.find_element(By.NAME, "captcha_1").send_keys("passed")
 
-            email_input.send_keys(email)
-            username_input.send_keys(username)
-            password_input.send_keys(password)
-            self.browser.find_element(By.ID, "submit_button").click()
+        email_input.send_keys(email)
+        username_input.send_keys(username)
+        password_input.send_keys(password)
+        self.browser.find_element(By.ID, "submit_button").click()
 
     def create_post(self, header='header test', body= 'body test'):
 
