@@ -72,10 +72,10 @@ class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
         self.assertContains(response, 'name="email"')
         self.assertContains(response, 'name="password"')
     
-    def test__user_can_not_authenticate_with_incorrect_password(self):
+    def test_user_can_not_authenticate_with_incorrect_password(self):
         
         response= self.client.post(reverse('login'),
-                        data={'email_input': 'user1@gmail.com','password_input': 'wrongpass' })
+                        data={'email': 'user1@gmail.com','password': 'wrongpass' })
 
         self.assertFalse(response.wsgi_request.user.is_authenticated,
                          msg='user is loged in with an incorrect password!')
