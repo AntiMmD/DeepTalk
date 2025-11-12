@@ -221,13 +221,14 @@ class HomePageTest(FunctionalTest):
             email='writer@gmail.com',
             password='pass'
         )
+        posts = []
         for i in range(25):
-            Post.objects.create(
+            posts.append(Post(
                 user=user,
                 header=f'Post {i}',
                 body=f'Body {i}'
-            )
-        
+            ))
+        Post.objects.bulk_create(posts)
         self.browser.get(self.live_server_url)
         
         # Should see pagination
