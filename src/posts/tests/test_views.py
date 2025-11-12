@@ -1,48 +1,7 @@
 from django.test import TestCase
 from posts.models import Post,User
 from django.urls import reverse
-
-header = 'header test1'
-body = 'body test1'    
-def create_post(user, header=header, body= body, amount=1):
-    if amount ==1:
-        post_obj = Post.objects.create(user=user, header=header, body=body)
-        return post_obj
-    
-    posts= [Post(user= user, header= header, body=body) for _ in range(0,amount)]
-    post_objects = Post.objects.bulk_create(posts)
-    return post_objects
-
-
-class UserAndPostFactoryMixin:
-    # note to myself: setUpTestData runs once before every class that inherits from TestCase
-    # but setUp() runs once before every method!
-    
-    @classmethod
-    def setUpTestData(cls): 
-        cls.user1 = User.objects.create_user(email='user1@gmail.com',
-                                             username='user1', password='1234')
-        cls.user2 = User.objects.create_user(email='user2@gmail.com',
-                                             username='user2', password='1234')
-
-        # create single objects (create_post(amount=1) returns the object)
-        cls.post_obj1 = create_post(user=cls.user1)
-        cls.post_obj2 = create_post(user=cls.user2,
-                                    header='header test2', body='body test2')
-
-
-class SignUpMixin:
-    def sign_up(self, email='test@gmail.com', username='test', password= 'test',captcha_1= 'passed'):
-            with self.settings(CAPTCHA_TEST_MODE=True):
-                response = self.client.post(reverse('sign_up'),
-                                            data={'email': email,
-                                                'username':username,
-                                                'password':password,
-                                                'captcha_0': 'dummy',
-                                                'captcha_1':captcha_1})
-                return response
-            
-
+from .base import *
 
 class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
 
@@ -94,7 +53,6 @@ class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
         
         self.assertFalse(response.wsgi_request.user.is_authenticated)
         self.assertRedirects(response, reverse('login'))
-
 
 
 class ErrorHandlingTest(SignUpMixin, TestCase):
@@ -162,7 +120,6 @@ class HomePageTest(UserAndPostFactoryMixin, TestCase):
         self.assertEqual(posts_in_context[1].header, 'header test1')
 
 
-
 class PaginationTest(UserAndPostFactoryMixin, TestCase):
     """Test pagination behavior without hardcoding page size"""
     
@@ -196,7 +153,6 @@ class PaginationTest(UserAndPostFactoryMixin, TestCase):
                         "Pages should display different posts")
 
 
-
 class CreatePostTest(UserAndPostFactoryMixin, TestCase):
 
     def test_create_post_button_redirects_loged_out_user_to_signup(self):
@@ -225,7 +181,6 @@ class CreatePostTest(UserAndPostFactoryMixin, TestCase):
         self.assertEqual(post_obj.header, header)
         self.assertEqual(post_obj.body, body)
         self.assertRedirects(response, f'{reverse("posts:post_view", args=[post_obj.id])}')
-        
 
 
 class PostManagerTest(UserAndPostFactoryMixin, TestCase): 
@@ -336,16 +291,3 @@ class PostViewTest(UserAndPostFactoryMixin, TestCase):
         self.client.login(email='user1@gmail.com', password='1234')
         response = self.client.get(reverse('posts:edit_post', args=[self.post_obj2.id]), follow=True)
         self.assertContains(response, "You can't edit someone else's post dummy!", html=True)
-
-    
-
-
-class UserAndPostModelsTest(UserAndPostFactoryMixin, TestCase):
-    def test_each_post_is_associated_with_a_user(self):
-        saved_post_obj1= Post.objects.get(user= self.user1 )
-        saved_post_obj2= Post.objects.get(user= self.user2 )
-        self.assertEqual(saved_post_obj1, self.post_obj1)
-        self.assertEqual(saved_post_obj2,self. post_obj2)
-
-    def test_post_has_a_created_at_field(self):
-        self.assertGreater(self.post_obj2.created_at, self.post_obj1.created_at)
