@@ -104,6 +104,16 @@ class ErrorHandlingTest(SignUpMixin, TestCase):
 
 
 class HomePageTest(UserAndPostFactoryMixin, TestCase):
+
+    def test_home_page_returns_405_when_GET_NOT_used(self):
+        response= self.client.post(reverse('home'))
+        self.assertEqual(response.status_code, 405)
+
+        response= self.client.put(reverse('home'))
+        self.assertEqual(response.status_code, 405)
+
+        response= self.client.patch(reverse('home'))
+        self.assertEqual(response.status_code, 405)
     
     def test_home_page_uses_home_template(self):
         response = self.client.get(reverse('home'))
@@ -133,10 +143,6 @@ class HomePageTest(UserAndPostFactoryMixin, TestCase):
         posts_in_context = response.context['posts']
         self.assertEqual(posts_in_context[0].header, 'header test2') #newer post
         self.assertEqual(posts_in_context[1].header, 'header test1')
-    
-    def test_home_page_returns_405_when_POST_is_used(self):
-        response= self.client.post(reverse('home'))
-        self.assertEqual(response.status_code, 405)
 
 
 
@@ -174,7 +180,15 @@ class PaginationTest(UserAndPostFactoryMixin, TestCase):
                         "Pages should display different posts")
 
 
-class CreatePostTest(UserAndPostFactoryMixin, TestCase):
+class CreatePostViewTest(UserAndPostFactoryMixin, TestCase):
+
+    def test_create_post_button_returns_405_if_POST_or_Get_NOT_used(self):
+        self.client.force_login(user= self.user1)
+        response= self.client.put(reverse('posts:create_post'))
+        self.assertEqual(response.status_code, 405)
+
+        response= self.client.patch(reverse('posts:create_post'))
+        self.assertEqual(response.status_code, 405)
 
     def test_create_post_button_redirects_loged_out_user_to_signup(self):
         response = self.client.get(reverse('posts:create_post'))
@@ -204,7 +218,20 @@ class CreatePostTest(UserAndPostFactoryMixin, TestCase):
         self.assertRedirects(response, f'{reverse("posts:post_view", args=[post_obj.id])}')
 
 
-class PostManagerTest(UserAndPostFactoryMixin, TestCase): 
+class PostManagerViewTest(UserAndPostFactoryMixin, TestCase): 
+
+    def test_post_manager_returns_405_if_GET_not_used(self):
+        self.client.force_login(self.user1)
+
+        response= self.client.post(reverse('posts:post_manager'))
+        self.assertEqual(response.status_code, 405)
+
+        response= self.client.put(reverse('posts:post_manager'))
+        self.assertEqual(response.status_code, 405)
+
+        response= self.client.patch(reverse('posts:post_manager'))
+        self.assertEqual(response.status_code, 405)
+
     def test_post_manager_uses_the_correct_template(self):
         self.client.force_login(self.user1)
         response= self.client.get(reverse('posts:post_manager'))

@@ -22,6 +22,7 @@ def home(request):
     posts = paginator.get_page(page_number)
     return render(request, 'posts/home.html', context={'posts':posts})
 
+
 @require_http_methods(["GET", "POST"])
 def sign_up(request):
     if request.method == 'POST':
@@ -36,6 +37,7 @@ def sign_up(request):
         form = SignUpForm()
 
     return render(request, 'posts/signUp.html', context={'form': form})     
+
 
 @require_http_methods(["GET", "POST"])
 def log_in(request):
@@ -56,6 +58,7 @@ def log_out(request):
     return redirect('login')
 
 @login_required(login_url='sign_up')
+@require_http_methods(["GET", "POST"])
 def create_post(request):
     if request.method == 'POST':
         post_user = request.user
@@ -66,15 +69,19 @@ def create_post(request):
 
     return render(request, 'posts/postForm.html')
 
+
 @login_required(login_url='login')
+@require_GET
 def post_manager(request):
         posts = Post.objects.filter(user= request.user)
         return render(request, 'posts/postManager.html', context={'posts':posts})
+
 
 @require_GET
 def post_view(request, id):
     post_obj= get_object_or_404(Post, id=id)
     return render(request, 'posts/postView.html', context={'post': post_obj})
+
 
 @require_POST
 @login_required(login_url='login')
@@ -87,6 +94,7 @@ def delete_post(request, id):
         return render(request, 'posts/postView.html', 
                       context={'post': post_obj,
                                'error':"You can't delete someone else's post dummy!"})
+
 
 @require_http_methods(['GET','POST'])
 @login_required(login_url='login')
