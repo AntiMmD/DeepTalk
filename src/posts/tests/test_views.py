@@ -277,7 +277,8 @@ class PostViewTest(UserAndPostFactoryMixin, TestCase):
     def test_post_view_has_delete_button(self):
         response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
         self.assertContains(response, f'<button id="delete_post"')
-    
+
+class DeletePostViewTest(UserAndPostFactoryMixin, TestCase):
     def test_post_views_delete_button_redirects_to_post_manager_page(self):
         self.client.login(email='user1@gmail.com', password='1234')
         response = self.client.post(reverse('posts:delete_post', args=[self.post_obj1.id]))
@@ -294,7 +295,8 @@ class PostViewTest(UserAndPostFactoryMixin, TestCase):
         response = self.client.post(reverse('posts:delete_post', args=[self.post_obj2.id]), follow=True)
         self.assertTrue(Post.objects.filter(id=self.post_obj2.id).exists()) 
         self.assertContains(response, "You can't delete someone else's post dummy!", html=True)
-    
+
+class EditPostView(UserAndPostFactoryMixin, TestCase):
     def test_post_views_edit_button_displays_a_prefilled_post_form(self):
         self.client.login(email='user1@gmail.com', password='1234')
         response = self.client.get(reverse('posts:edit_post', args=[self.post_obj1.id]))
