@@ -73,7 +73,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def create_post(self, header='header test', body= 'body test'):
 
-        self.browser.get(f"{self.live_server_url}{reverse('posts:post_form')}")
+        self.browser.get(f"{self.live_server_url}{reverse('posts:create_post')}")
         self.browser.find_element(By.ID, 'post_form')
         header_input = self.browser.find_element(By.NAME, 'header_input')
         body_input = self.browser.find_element(By.NAME, 'body_input')

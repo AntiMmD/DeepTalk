@@ -111,7 +111,7 @@ class HomePageTest(UserAndPostFactoryMixin, TestCase):
 
     def test_home_page_post_button(self):
         response = self.client.get(reverse('home'))
-        self.assertContains(response, reverse("posts:post_form"))
+        self.assertContains(response, reverse("posts:create_post"))
         self.assertContains(response, '<button id="create_post_button">')      
 
     def test_can_navigate_to_post_manager(self):
@@ -177,14 +177,14 @@ class PaginationTest(UserAndPostFactoryMixin, TestCase):
 class CreatePostTest(UserAndPostFactoryMixin, TestCase):
 
     def test_create_post_button_redirects_loged_out_user_to_signup(self):
-        response = self.client.get(reverse('posts:post_form'))
+        response = self.client.get(reverse('posts:create_post'))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(reverse('sign_up')))
 
     def test_create_post_button_renders_a_form_template_correctly_for_a_loged_in_user(self):
 
         self.client.force_login(self.user1)
-        response = self.client.get(reverse('posts:post_form'))
+        response = self.client.get(reverse('posts:create_post'))
         self.assertTemplateUsed(response, 'posts/postForm.html')
         self.assertContains(response, '<form method="POST"')
         self.assertContains(response, '<input name="header_input"')
@@ -192,7 +192,7 @@ class CreatePostTest(UserAndPostFactoryMixin, TestCase):
     
     def test_can_submit_the_post_form_and_is_redirected(self):
         self.client.force_login(self.user1)
-        response = self.client.post(reverse('posts:post_form'),
+        response = self.client.post(reverse('posts:create_post'),
                             data={'header_input': header, 'body_input': body})
         
         self.assertEqual(Post.objects.count(), 3, msg="Post object was not created. Maybe define the Post model fields?")

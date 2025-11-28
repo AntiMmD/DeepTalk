@@ -55,6 +55,22 @@ def log_out(request):
     logout(request)
     return redirect('login')
 
+@login_required(login_url='sign_up')
+def create_post(request):
+    if request.method == 'POST':
+        post_user = request.user
+        post_header = request.POST['header_input']
+        post_body = request.POST['body_input']
+        post_obj = Post.objects.create(user= post_user, header= post_header, body= post_body)
+        return redirect(reverse('posts:post_view', args=[post_obj.id]))
+
+    return render(request, 'posts/postForm.html')
+
+@login_required(login_url='login')
+def post_manager(request):
+        posts = Post.objects.filter(user= request.user)
+        return render(request, 'posts/postManager.html', context={'posts':posts})
+
 @require_GET
 def post_view(request, id):
     post_obj= get_object_or_404(Post, id=id)
@@ -92,20 +108,4 @@ def edit_post(request, id):
             post_obj.body= post_body
             post_obj.save()
             return redirect(reverse('posts:post_view', args=[post_obj.id]))
-        
-@login_required(login_url='sign_up')
-def post_form(request):
-    if request.method == 'POST':
-        post_user = request.user
-        post_header = request.POST['header_input']
-        post_body = request.POST['body_input']
-        post_obj = Post.objects.create(user= post_user, header= post_header, body= post_body)
-        return redirect(reverse('posts:post_view', args=[post_obj.id]))
-
-    return render(request, 'posts/postForm.html')
-
-@login_required(login_url='login')
-def post_manager(request):
-        posts = Post.objects.filter(user= request.user)
-        return render(request, 'posts/postManager.html', context={'posts':posts})
 
