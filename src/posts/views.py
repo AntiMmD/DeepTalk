@@ -60,6 +60,8 @@ def post_view(request, id):
     post_obj= get_object_or_404(Post, id=id)
     return render(request, 'posts/postView.html', context={'post': post_obj})
 
+@require_POST
+@login_required(login_url='login')
 def delete_post(request, id):
     post_obj = get_object_or_404(Post, id=id)
     if request.user == post_obj.user:
@@ -70,6 +72,8 @@ def delete_post(request, id):
                       context={'post': post_obj,
                                'error':"You can't delete someone else's post dummy!"})
 
+@require_http_methods(['GET','POST'])
+@login_required(login_url='login')
 def edit_post(request, id):
     post_obj = get_object_or_404(Post, id=id)
 

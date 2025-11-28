@@ -279,6 +279,27 @@ class PostViewTest(UserAndPostFactoryMixin, TestCase):
         self.assertContains(response, f'<button id="delete_post"')
 
 class DeletePostViewTest(UserAndPostFactoryMixin, TestCase):
+
+    def test_post_views_delete_button_returns_405_if_POST_is_NOT_used(self):
+        response = self.client.get(reverse('posts:delete_post', args=[self.post_obj1.id]))
+        self.assertEqual(response.status_code, 405)
+
+        response = self.client.put(reverse('posts:delete_post', args=[self.post_obj1.id]))
+        self.assertEqual(response.status_code, 405)
+
+        response = self.client.patch(reverse('posts:delete_post', args=[self.post_obj1.id]))
+        self.assertEqual(response.status_code, 405)
+
+    def test_post_views_delete_button_redirects_to_login_page_if_user_is_not_logged_in(self):
+        url = reverse('posts:delete_post', args=[self.post_obj1.id])
+
+        response = self.client.post(url)
+
+        login_url = reverse('login')
+        expected_redirect_url = f'{login_url}?next={url}'
+
+        self.assertRedirects(response, expected_redirect_url)
+
     def test_post_views_delete_button_redirects_to_post_manager_page(self):
         self.client.login(email='user1@gmail.com', password='1234')
         response = self.client.post(reverse('posts:delete_post', args=[self.post_obj1.id]))
@@ -297,6 +318,23 @@ class DeletePostViewTest(UserAndPostFactoryMixin, TestCase):
         self.assertContains(response, "You can't delete someone else's post dummy!", html=True)
 
 class EditPostView(UserAndPostFactoryMixin, TestCase):
+    def test_post_views_edit_button_returns_405_if_POST_or_GET_NOT_used(self):
+        response = self.client.put(reverse('posts:edit_post', args=[self.post_obj1.id]))
+        self.assertEqual(response.status_code, 405)
+
+        response = self.client.patch(reverse('posts:edit_post', args=[self.post_obj1.id]))
+        self.assertEqual(response.status_code, 405)
+
+    def test_post_views_edit_button_redirects_to_login_page_if_user_is_not_logged_in(self):
+        url = reverse('posts:edit_post', args=[self.post_obj1.id])
+
+        response = self.client.get(url)
+
+        login_url = reverse('login')
+        expected_redirect_url = f'{login_url}?next={url}'
+
+        self.assertRedirects(response, expected_redirect_url)
+
     def test_post_views_edit_button_displays_a_prefilled_post_form(self):
         self.client.login(email='user1@gmail.com', password='1234')
         response = self.client.get(reverse('posts:edit_post', args=[self.post_obj1.id]))
