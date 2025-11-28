@@ -21,6 +21,14 @@ class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
         self.assertTrue(response.wsgi_request.user.is_authenticated)
         self.assertRedirects(response, reverse('home'))
 
+    def test_signup_returns_405_if_POST_or_GET_are_NOT_used(self):
+        response= self.client.put(reverse('sign_up'))
+        self.assertEqual(response.status_code, 405)
+
+        response= self.client.patch(reverse('sign_up'))
+        self.assertEqual(response.status_code, 405)
+
+
     def test_login_renders_the_correct_template(self):
         response= self.client.get(reverse('login'))
         self.assertTemplateUsed(response,'posts/login.html')
@@ -30,6 +38,13 @@ class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
         self.assertContains(response, '<form id="login"')
         self.assertContains(response, 'name="email"')
         self.assertContains(response, 'name="password"')
+
+    def test_login_returns_405_if_POST_or_GET_are_NOT_used(self):
+        response= self.client.put(reverse('login'))
+        self.assertEqual(response.status_code, 405)
+
+        response= self.client.patch(reverse('login'))
+        self.assertEqual(response.status_code, 405)    
     
     def test_user_can_not_authenticate_with_incorrect_password(self):
         
@@ -118,6 +133,12 @@ class HomePageTest(UserAndPostFactoryMixin, TestCase):
         posts_in_context = response.context['posts']
         self.assertEqual(posts_in_context[0].header, 'header test2') #newer post
         self.assertEqual(posts_in_context[1].header, 'header test1')
+    
+    def test_home_page_returns_405_when_POST_is_used(self):
+        response= self.client.post(reverse('home'))
+        self.assertEqual(response.status_code, 405)
+
+
 
 
 class PaginationTest(UserAndPostFactoryMixin, TestCase):
@@ -218,6 +239,17 @@ class PostManagerTest(UserAndPostFactoryMixin, TestCase):
 
 
 class PostViewTest(UserAndPostFactoryMixin, TestCase):
+
+    def test_post_view_returns_405_if_GET_is_NOT_used(self):
+        response= self.client.post(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
+        self.assertEqual(response.status_code, 405)
+        
+        response= self.client.put(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
+        self.assertEqual(response.status_code, 405)
+
+        response= self.client.patch(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
+        self.assertEqual(response.status_code, 405)
+
     def test_post_view_displays_correct_post(self):
         response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
 

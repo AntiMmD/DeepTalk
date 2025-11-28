@@ -8,8 +8,13 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from Blog.settings import PAGINATE_BY
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseNotAllowed
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET,require_POST, require_http_methods
 User = get_user_model()
 
+@csrf_exempt
+@require_GET
 def home(request):
     posts = Post.objects.select_related('user').all()
     paginator = Paginator(posts, PAGINATE_BY)
@@ -17,6 +22,7 @@ def home(request):
     posts = paginator.get_page(page_number)
     return render(request, 'posts/home.html', context={'posts':posts})
 
+@require_http_methods(["GET", "POST"])
 def sign_up(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -28,9 +34,10 @@ def sign_up(request):
             return redirect('home')
     else:
         form = SignUpForm()
-    
+
     return render(request, 'posts/signUp.html', context={'form': form})     
 
+@require_http_methods(["GET", "POST"])
 def log_in(request):
     if request.method == 'POST':
         form= LoginForm(request.POST)
@@ -40,13 +47,15 @@ def log_in(request):
         else: 
             return render(request, 'posts/login.html', context={'form': form})
 
-    return render(request, 'posts/login.html', context={'form': LoginForm()})
+    elif request.method == 'GET':
+        return render(request, 'posts/login.html', context={'form': LoginForm()})
 
 def log_out(request):
     from django.contrib.auth import logout
     logout(request)
     return redirect('login')
 
+@require_GET
 def post_view(request, id):
     post_obj= get_object_or_404(Post, id=id)
     return render(request, 'posts/postView.html', context={'post': post_obj})
