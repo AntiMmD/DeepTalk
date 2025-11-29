@@ -9,11 +9,9 @@ from django.contrib import messages
 from Blog.settings import PAGINATE_BY
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseNotAllowed
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET,require_POST, require_http_methods
 User = get_user_model()
 
-@csrf_exempt
 @require_GET
 def home(request):
     posts = Post.objects.select_related('user').all()
