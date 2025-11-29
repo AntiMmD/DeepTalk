@@ -89,29 +89,28 @@ def delete_post(request, id):
         post_obj.delete()
         return redirect(reverse('posts:post_manager'))
     else:
+        messages.error(request, "You can't delete someone else's post dummy!")
         return render(request, 'posts/postView.html', 
-                      context={'post': post_obj,
-                               'error':"You can't delete someone else's post dummy!"})
+                      context={'post': post_obj}, status=403)
 
 
 @require_http_methods(['GET','POST'])
 @login_required(login_url='login')
 def edit_post(request, id):
     post_obj = get_object_or_404(Post, id=id)
-
-    if request.method == 'GET':
-        if post_obj.user == request.user:
-            return render(request, 'posts/postForm.html', context={'post': post_obj})
     
+    if post_obj.user != request.user:
         messages.error(request, "You can't edit someone else's post dummy!")
-        return redirect('posts:post_view', post_obj.id)
+        return render(request, 'posts/postView.html', 
+                      context={'post': post_obj}, status=403)
+    
+    if request.method == 'GET':
+        return render(request, 'posts/postForm.html', context={'post': post_obj})
     
     if request.method == 'POST':
-        if post_obj.user == request.user:
-            post_header = request.POST['header_input']
-            post_body = request.POST['body_input']
-            post_obj.header= post_header
-            post_obj.body= post_body
-            post_obj.save()
-            return redirect(reverse('posts:post_view', args=[post_obj.id]))
-
+        post_header = request.POST['header_input']
+        post_body = request.POST['body_input']
+        post_obj.header= post_header
+        post_obj.body= post_body
+        post_obj.save()
+        return redirect(reverse('posts:post_view', args=[post_obj.id]))

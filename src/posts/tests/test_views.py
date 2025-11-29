@@ -338,11 +338,12 @@ class DeletePostViewTest(UserAndPostFactoryMixin, TestCase):
         self.assertNotContains(response, self.post_obj1.header)
         self.assertFalse(Post.objects.filter(id=self.post_obj1.id).exists()) 
 
-    def test_post_views_delete_button_only_deletes_the_post_of_the_author_not_other_users(self):
+    def test_delete_post_denied_for_non_owner_and_returns_403_and_an_error(self):
         self.client.login(email='user1@gmail.com', password='1234')
-        response = self.client.post(reverse('posts:delete_post', args=[self.post_obj2.id]), follow=True)
+        response = self.client.post(reverse('posts:delete_post', args=[self.post_obj2.id]))
         self.assertTrue(Post.objects.filter(id=self.post_obj2.id).exists()) 
-        self.assertContains(response, "You can't delete someone else's post dummy!", html=True)
+        self.assertContains(response, "You can't delete someone else's post dummy!", status_code=403, html=True)
+
 
 class EditPostView(UserAndPostFactoryMixin, TestCase):
     def test_post_views_edit_button_returns_405_if_POST_or_GET_NOT_used(self):
@@ -386,7 +387,11 @@ class EditPostView(UserAndPostFactoryMixin, TestCase):
         self.assertEqual(self.post_obj1.body, new_body)
         self.assertRedirects(response, reverse('posts:post_view', args=[self.post_obj1.id]))
 
-    def test_post_views_edit_button_only_edits_the_post_of_the_author_not_other_users(self):
+    def test_edit_post_denied_for_non_owner_and_returns_403_and_an_error(self):
         self.client.login(email='user1@gmail.com', password='1234')
         response = self.client.get(reverse('posts:edit_post', args=[self.post_obj2.id]), follow=True)
-        self.assertContains(response, "You can't edit someone else's post dummy!", html=True)
+        self.assertContains(response, "You can't edit someone else's post dummy!",status_code=403, html=True)
+
+        self.client.login(email='user1@gmail.com', password='1234')
+        response = self.client.post(reverse('posts:edit_post', args=[self.post_obj2.id]), follow=True)
+        self.assertContains(response, "You can't edit someone else's post dummy!",status_code=403, html=True)
