@@ -162,3 +162,8 @@ if not TESTING:
 
 if TESTING:
     CAPTCHA_TEST_MODE=True
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": True,
+
+    }
