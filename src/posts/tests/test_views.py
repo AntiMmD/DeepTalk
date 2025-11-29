@@ -190,10 +190,10 @@ class CreatePostViewTest(UserAndPostFactoryMixin, TestCase):
         response= self.client.patch(reverse('posts:create_post'))
         self.assertEqual(response.status_code, 405)
 
-    def test_create_post_button_redirects_loged_out_user_to_signup(self):
+    def test_create_post_button_redirects_loged_out_user_to_login(self):
         response = self.client.get(reverse('posts:create_post'))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(reverse('sign_up')))
+        self.assertTrue(response.url.startswith(reverse('login')))
 
     def test_create_post_button_renders_a_form_template_correctly_for_a_loged_in_user(self):
 

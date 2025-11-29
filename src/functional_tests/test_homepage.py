@@ -24,13 +24,14 @@ class HomePageTest(FunctionalTest):
         self.assertEqual('+ create post', button.text.lower())
         button.click()
 
-        # Farshad sees a sign-un form instead, he understand that he needs to sign-up first using email
-        # he does so
+        # Farshad sees a login form instead, he understand that he needs to create an account first
+        # he does so by using his email address
 
         self.wait_for(lambda:self.assertEqual(urlparse(self.browser.current_url).path,
-                            reverse('sign_up')))
+                            reverse('login')))
 
-        self.assertIn('email:', self.browser.page_source.lower())
+        self.browser.find_element(By.ID, 'signUp_navigation').click()
+        self.wait_for(lambda:self.assertIn('email:', self.browser.page_source.lower()))
         self.assertIn('username:', self.browser.page_source.lower())
         self.assertIn('password:', self.browser.page_source.lower())
 

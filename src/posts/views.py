@@ -55,7 +55,7 @@ def log_out(request):
     logout(request)
     return redirect('login')
 
-@login_required(login_url='sign_up')
+@login_required(login_url='login')
 @require_http_methods(["GET", "POST"])
 def create_post(request):
     if request.method == 'POST':
