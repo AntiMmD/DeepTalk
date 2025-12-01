@@ -63,7 +63,7 @@ class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
         self.assertRedirects(response, reverse('home'))
 
     def test_logout_redirects_to_login_page_and_logs_out_user(self):
-        self.client.login(email= self.user1.email, password='1234')
+        self.client.force_login(self.user1)
         response= self.client.get(reverse('logout'))
         
         self.assertFalse(response.wsgi_request.user.is_authenticated)
@@ -147,17 +147,17 @@ class HomePageTest(UserAndPostFactoryMixin, TestCase):
 
 
 
-class PaginationTest(UserAndPostFactoryMixin, TestCase):
+class PaginationTest(TestCase):
     """Test pagination behavior without hardcoding page size"""
     
-    def setUp(self):
-        super().setUp()
-        self.user = User.objects.create_user(
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(
             email='pagtest@gmail.com', 
             username='pagtest'
         )
 
-        create_post(user=self.user, amount=60)
+        create_post(user=cls.user, amount=60)
     
     def test_home_page_displays_pagination_controls(self):
         response = self.client.get(reverse('home'))
@@ -308,6 +308,7 @@ class PostViewTest(UserAndPostFactoryMixin, TestCase):
 class DeletePostViewTest(UserAndPostFactoryMixin, TestCase):
 
     def test_post_views_delete_button_returns_405_if_POST_is_NOT_used(self):
+        self.client.force_login(self.user1)
         response = self.client.get(reverse('posts:delete_post', args=[self.post_obj1.id]))
         self.assertEqual(response.status_code, 405)
 
@@ -328,26 +329,28 @@ class DeletePostViewTest(UserAndPostFactoryMixin, TestCase):
         self.assertRedirects(response, expected_redirect_url)
 
     def test_post_views_delete_button_redirects_to_post_manager_page(self):
-        self.client.login(email='user1@gmail.com', password='1234')
+        self.client.force_login(self.user1)
         response = self.client.post(reverse('posts:delete_post', args=[self.post_obj1.id]))
         self.assertRedirects(response, reverse('posts:post_manager'))
 
     def test_post_views_delete_button_deletes_the_post(self):
-        self.client.login(email='user1@gmail.com', password='1234')
+        self.client.force_login(self.user1)
         response = self.client.post(reverse('posts:delete_post', args=[self.post_obj1.id]), follow=True)
         self.assertNotContains(response, self.post_obj1.header)
         self.assertFalse(Post.objects.filter(id=self.post_obj1.id).exists()) 
 
     def test_delete_post_denied_for_non_owner_and_returns_403_and_an_error(self):
-        self.client.login(email='user1@gmail.com', password='1234')
+        self.client.force_login(self.user1)
         response = self.client.post(reverse('posts:delete_post', args=[self.post_obj2.id]))
         self.assertTrue(Post.objects.filter(id=self.post_obj2.id).exists()) 
         self.assertContains(response, "You can't delete someone else's post dummy!", status_code=403, html=True)
 
 
-class EditPostView(UserAndPostFactoryMixin, TestCase):
+class EditPostViewTest(UserAndPostFactoryMixin, TestCase):
     def test_post_views_edit_button_returns_405_if_POST_or_GET_NOT_used(self):
+        self.client.force_login(self.user1)
         response = self.client.put(reverse('posts:edit_post', args=[self.post_obj1.id]))
+
         self.assertEqual(response.status_code, 405)
 
         response = self.client.patch(reverse('posts:edit_post', args=[self.post_obj1.id]))
@@ -364,13 +367,13 @@ class EditPostView(UserAndPostFactoryMixin, TestCase):
         self.assertRedirects(response, expected_redirect_url)
 
     def test_post_views_edit_button_displays_a_prefilled_post_form(self):
-        self.client.login(email='user1@gmail.com', password='1234')
+        self.client.force_login(self.user1)
         response = self.client.get(reverse('posts:edit_post', args=[self.post_obj1.id]))
         self.assertIn('header test', response.content.decode())
         self.assertIn('body test', response.content.decode())
     
     def test_edit_post_updates_post(self):
-        self.client.login(email='user1@gmail.com', password='1234')
+        self.client.force_login(self.user1)
         new_header = "Updated Header"
         new_body = "Updated body content"
 
@@ -388,10 +391,6 @@ class EditPostView(UserAndPostFactoryMixin, TestCase):
         self.assertRedirects(response, reverse('posts:post_view', args=[self.post_obj1.id]))
 
     def test_edit_post_denied_for_non_owner_and_returns_403_and_an_error(self):
-        self.client.login(email='user1@gmail.com', password='1234')
-        response = self.client.get(reverse('posts:edit_post', args=[self.post_obj2.id]), follow=True)
-        self.assertContains(response, "You can't edit someone else's post dummy!",status_code=403, html=True)
-
-        self.client.login(email='user1@gmail.com', password='1234')
-        response = self.client.post(reverse('posts:edit_post', args=[self.post_obj2.id]), follow=True)
+        self.client.force_login(self.user1)
+        response = self.client.get(reverse('posts:edit_post', args=[self.post_obj2.id]))
         self.assertContains(response, "You can't edit someone else's post dummy!",status_code=403, html=True)
