@@ -3,7 +3,7 @@ from posts.models import Post,User
 from django.urls import reverse
 from .base import *
 
-class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
+class AuthenticationTest(SignUpMixin, UserAndPostFactoryMixin, MethodNotAllowedMixin, TestCase):
 
     def test_sign_up_page_uses_correct_contents(self):
         response = self.client.get(reverse('sign_up'))
@@ -22,11 +22,7 @@ class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
         self.assertRedirects(response, reverse('home'))
 
     def test_signup_returns_405_if_POST_or_GET_are_NOT_used(self):
-        response= self.client.put(reverse('sign_up'))
-        self.assertEqual(response.status_code, 405)
-
-        response= self.client.patch(reverse('sign_up'))
-        self.assertEqual(response.status_code, 405)
+        self.assert_methods_not_allowed(methods=['put', 'patch'],url=reverse('sign_up'))
 
 
     def test_login_renders_the_correct_template(self):
@@ -40,12 +36,8 @@ class AuthenticationTest(SignUpMixin,UserAndPostFactoryMixin,TestCase):
         self.assertContains(response, 'name="password"')
 
     def test_login_returns_405_if_POST_or_GET_are_NOT_used(self):
-        response= self.client.put(reverse('login'))
-        self.assertEqual(response.status_code, 405)
+        self.assert_methods_not_allowed(methods=['put', 'patch'],url=reverse('login'))
 
-        response= self.client.patch(reverse('login'))
-        self.assertEqual(response.status_code, 405)    
-    
     def test_user_can_not_authenticate_with_incorrect_password(self):
         
         response= self.client.post(reverse('login'),
@@ -103,17 +95,10 @@ class ErrorHandlingTest(SignUpMixin, TestCase):
 
 
 
-class HomePageTest(UserAndPostFactoryMixin, TestCase):
+class HomePageTest(UserAndPostFactoryMixin, MethodNotAllowedMixin, TestCase):
 
     def test_home_page_returns_405_when_GET_NOT_used(self):
-        response= self.client.post(reverse('home'))
-        self.assertEqual(response.status_code, 405)
-
-        response= self.client.put(reverse('home'))
-        self.assertEqual(response.status_code, 405)
-
-        response= self.client.patch(reverse('home'))
-        self.assertEqual(response.status_code, 405)
+        self.assert_methods_not_allowed(methods=['post','put','patch'],url=reverse('home'))
     
     def test_home_page_uses_home_template(self):
         response = self.client.get(reverse('home'))
@@ -180,15 +165,11 @@ class PaginationTest(TestCase):
                         "Pages should display different posts")
 
 
-class CreatePostViewTest(UserAndPostFactoryMixin, TestCase):
+class CreatePostViewTest(UserAndPostFactoryMixin, MethodNotAllowedMixin, TestCase):
 
     def test_create_post_button_returns_405_if_POST_or_Get_NOT_used(self):
-        self.client.force_login(user= self.user1)
-        response= self.client.put(reverse('posts:create_post'))
-        self.assertEqual(response.status_code, 405)
-
-        response= self.client.patch(reverse('posts:create_post'))
-        self.assertEqual(response.status_code, 405)
+        self.client.force_login(user= self.user1)        
+        self.assert_methods_not_allowed(methods=['put','patch'],url=reverse('home'))
 
     def test_create_post_button_redirects_loged_out_user_to_login(self):
         response = self.client.get(reverse('posts:create_post'))
@@ -218,19 +199,11 @@ class CreatePostViewTest(UserAndPostFactoryMixin, TestCase):
         self.assertRedirects(response, f'{reverse("posts:post_view", args=[post_obj.id])}')
 
 
-class PostManagerViewTest(UserAndPostFactoryMixin, TestCase): 
+class PostManagerViewTest(UserAndPostFactoryMixin, MethodNotAllowedMixin, TestCase): 
 
     def test_post_manager_returns_405_if_GET_not_used(self):
         self.client.force_login(self.user1)
-
-        response= self.client.post(reverse('posts:post_manager'))
-        self.assertEqual(response.status_code, 405)
-
-        response= self.client.put(reverse('posts:post_manager'))
-        self.assertEqual(response.status_code, 405)
-
-        response= self.client.patch(reverse('posts:post_manager'))
-        self.assertEqual(response.status_code, 405)
+        self.assert_methods_not_allowed(methods=['post','put','patch'],url=reverse('home'))
 
     def test_post_manager_uses_the_correct_template(self):
         self.client.force_login(self.user1)
@@ -265,17 +238,10 @@ class PostManagerViewTest(UserAndPostFactoryMixin, TestCase):
 
 
 
-class PostViewTest(UserAndPostFactoryMixin, TestCase):
+class PostViewTest(UserAndPostFactoryMixin, MethodNotAllowedMixin, TestCase):
 
     def test_post_view_returns_405_if_GET_is_NOT_used(self):
-        response= self.client.post(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
-        self.assertEqual(response.status_code, 405)
-        
-        response= self.client.put(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
-        self.assertEqual(response.status_code, 405)
-
-        response= self.client.patch(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
-        self.assertEqual(response.status_code, 405)
+        self.assert_methods_not_allowed(methods=['post','put','patch'],url=reverse('home'))
 
     def test_post_view_displays_correct_post(self):
         response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
@@ -305,18 +271,11 @@ class PostViewTest(UserAndPostFactoryMixin, TestCase):
         response = self.client.get(f'{reverse("posts:post_view", args=[self.post_obj1.id])}')
         self.assertContains(response, f'<button id="delete_post"')
 
-class DeletePostViewTest(UserAndPostFactoryMixin, TestCase):
+class DeletePostViewTest(UserAndPostFactoryMixin, MethodNotAllowedMixin, TestCase):
 
     def test_post_views_delete_button_returns_405_if_POST_is_NOT_used(self):
         self.client.force_login(self.user1)
-        response = self.client.get(reverse('posts:delete_post', args=[self.post_obj1.id]))
-        self.assertEqual(response.status_code, 405)
-
-        response = self.client.put(reverse('posts:delete_post', args=[self.post_obj1.id]))
-        self.assertEqual(response.status_code, 405)
-
-        response = self.client.patch(reverse('posts:delete_post', args=[self.post_obj1.id]))
-        self.assertEqual(response.status_code, 405)
+        self.assert_methods_not_allowed(methods=['get','put','patch'],url=reverse('posts:delete_post', args=[self.post_obj1.id]))
 
     def test_post_views_delete_button_redirects_to_login_page_if_user_is_not_logged_in(self):
         url = reverse('posts:delete_post', args=[self.post_obj1.id])
@@ -346,15 +305,10 @@ class DeletePostViewTest(UserAndPostFactoryMixin, TestCase):
         self.assertContains(response, "You can't delete someone else's post dummy!", status_code=403, html=True)
 
 
-class EditPostViewTest(UserAndPostFactoryMixin, TestCase):
+class EditPostViewTest(UserAndPostFactoryMixin, MethodNotAllowedMixin, TestCase):
     def test_post_views_edit_button_returns_405_if_POST_or_GET_NOT_used(self):
         self.client.force_login(self.user1)
-        response = self.client.put(reverse('posts:edit_post', args=[self.post_obj1.id]))
-
-        self.assertEqual(response.status_code, 405)
-
-        response = self.client.patch(reverse('posts:edit_post', args=[self.post_obj1.id]))
-        self.assertEqual(response.status_code, 405)
+        self.assert_methods_not_allowed(methods=['put','patch'],url=reverse('posts:edit_post', args=[self.post_obj1.id]))
 
     def test_post_views_edit_button_redirects_to_login_page_if_user_is_not_logged_in(self):
         url = reverse('posts:edit_post', args=[self.post_obj1.id])

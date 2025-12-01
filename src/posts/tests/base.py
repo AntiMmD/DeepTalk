@@ -39,3 +39,16 @@ class SignUpMixin:
                                         'captcha_0': 'dummy',
                                         'captcha_1':captcha_1})
         return response
+    
+
+class MethodNotAllowedMixin:
+    def assert_methods_not_allowed(self, methods:list, url, status_code=405):
+
+        for method in methods:
+            with self.subTest(method=method):
+                # self.client.force_login(self.user1)
+                response= getattr(self.client, method)(url)
+                self.assertEqual(
+                    response.status_code,
+                    status_code,
+                    msg=f"{method.upper()} should return {status_code} for {url}")
